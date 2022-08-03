@@ -239,7 +239,7 @@ class IQMBackend(Backend):
             iqmc = IQMCircuit(
                 name=c.name if c.name else f"circuit_{i}", instructions=instrs
             )
-            run_id = self._client.submit_circuit(iqmc, qm, shots=n_shots)
+            run_id = self._client.submit_circuits([iqmc], qm, shots=n_shots)
             handles.append(ResultHandle(run_id.bytes, json.dumps(ppcirc_rep)))
         for handle in handles:
             self._cache[handle] = dict()
