@@ -20,7 +20,6 @@ from iqm_client.iqm_client import Circuit as IQMCircuit  # type: ignore
 from iqm_client.iqm_client import (  # type: ignore
     Instruction,
     IQMClient,
-    RunStatus,
     SingleQubitMapping,
 )
 import numpy as np
@@ -258,9 +257,9 @@ class IQMBackend(Backend):
         run_id = UUID(bytes=cast(bytes, handle[0]))
         run_result = self._client.get_run(run_id)
         status = run_result.status
-        if status is RunStatus.PENDING:
+        if status == "pending":
             return CircuitStatus(StatusEnum.SUBMITTED)
-        elif status is RunStatus.READY:
+        elif status == "ready":
             measurements = run_result.measurements
             shots = OutcomeArray.from_readouts(
                 np.array(
@@ -277,7 +276,7 @@ class IQMBackend(Backend):
             )
             return CircuitStatus(StatusEnum.COMPLETED)
         else:
-            assert status is RunStatus.FAILED
+            assert status == "failed"
             return CircuitStatus(StatusEnum.ERROR, run_result.message)
 
     def get_result(self, handle: ResultHandle, **kwargs: KwargTypes) -> BackendResult:
