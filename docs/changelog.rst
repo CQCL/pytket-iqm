@@ -4,7 +4,7 @@ Changelog
 0.5.0 (unreleased)
 ------------------
 
-* Updated iqm-client version requirement to 4.2.
+* Updated iqm-client version requirement to 4.3.
 
 0.4.0 (May 2022)
 ----------------
