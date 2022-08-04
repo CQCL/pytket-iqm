@@ -16,8 +16,6 @@ import shutil
 import os
 from setuptools import setup, find_namespace_packages  # type: ignore
 
-setup_dir = os.path.abspath(os.path.dirname(__file__))
-
 metadata: dict = {}
 with open("_metadata.py") as fp:
     exec(fp.read(), metadata)
@@ -40,7 +38,7 @@ setup(
     license="Apache 2",
     packages=find_namespace_packages(include=["pytket.*"]),
     include_package_data=True,
-    install_requires=["pytket ~= 1.4", "iqm-client ~= 3.0"],
+    install_requires=["pytket ~= 1.5", "iqm-client == 4.3"],
     classifiers=[
         "Environment :: Console",
         "Programming Language :: Python :: 3.9",

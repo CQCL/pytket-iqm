@@ -20,7 +20,6 @@ from iqm_client.iqm_client import Circuit as IQMCircuit  # type: ignore
 from iqm_client.iqm_client import (  # type: ignore
     Instruction,
     IQMClient,
-    RunStatus,
     SingleQubitMapping,
 )
 import numpy as np
@@ -239,7 +238,7 @@ class IQMBackend(Backend):
             iqmc = IQMCircuit(
                 name=c.name if c.name else f"circuit_{i}", instructions=instrs
             )
-            run_id = self._client.submit_circuit(iqmc, qm, shots=n_shots)
+            run_id = self._client.submit_circuits([iqmc], qm, shots=n_shots)
             handles.append(ResultHandle(run_id.bytes, json.dumps(ppcirc_rep)))
         for handle in handles:
             self._cache[handle] = dict()
@@ -258,10 +257,10 @@ class IQMBackend(Backend):
         run_id = UUID(bytes=cast(bytes, handle[0]))
         run_result = self._client.get_run(run_id)
         status = run_result.status
-        if status is RunStatus.PENDING:
+        if status == "pending":
             return CircuitStatus(StatusEnum.SUBMITTED)
-        elif status is RunStatus.READY:
-            measurements = run_result.measurements
+        elif status == "ready":
+            measurements = run_result.measurements[0]
             shots = OutcomeArray.from_readouts(
                 np.array(
                     [[r[0] for r in rlist] for cbstr, rlist in measurements.items()],
@@ -277,7 +276,7 @@ class IQMBackend(Backend):
             )
             return CircuitStatus(StatusEnum.COMPLETED)
         else:
-            assert status is RunStatus.FAILED
+            assert status == "failed"
             return CircuitStatus(StatusEnum.ERROR, run_result.message)
 
     def get_result(self, handle: ResultHandle, **kwargs: KwargTypes) -> BackendResult:

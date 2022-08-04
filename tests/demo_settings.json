@@ -890,6 +890,16 @@
                 "flux": {
                     "name": "QB1__flux",
                     "settings": {
+                        "target": {
+                            "parameter": {
+                                "collection_type": 0,
+                                "data_type": 1,
+                                "label": "Target flux",
+                                "name": "QB1__flux.target",
+                                "unit": "quanta"
+                            },
+                            "value": null
+                        },
                         "voltage": {
                             "parameter": {
                                 "collection_type": 0,
@@ -1754,6 +1764,16 @@
                 "flux": {
                     "name": "QB2__flux",
                     "settings": {
+                        "target": {
+                            "parameter": {
+                                "collection_type": 0,
+                                "data_type": 1,
+                                "label": "Target flux",
+                                "name": "QB2__flux.target",
+                                "unit": "quanta"
+                            },
+                            "value": null
+                        },
                         "voltage": {
                             "parameter": {
                                 "collection_type": 0,
@@ -2618,6 +2638,16 @@
                 "flux": {
                     "name": "QB3__flux",
                     "settings": {
+                        "target": {
+                            "parameter": {
+                                "collection_type": 0,
+                                "data_type": 1,
+                                "label": "Target flux",
+                                "name": "QB3__flux.target",
+                                "unit": "quanta"
+                            },
+                            "value": null
+                        },
                         "voltage": {
                             "parameter": {
                                 "collection_type": 0,
@@ -3482,6 +3512,16 @@
                 "flux": {
                     "name": "QB4__flux",
                     "settings": {
+                        "target": {
+                            "parameter": {
+                                "collection_type": 0,
+                                "data_type": 1,
+                                "label": "Target flux",
+                                "name": "QB4__flux.target",
+                                "unit": "quanta"
+                            },
+                            "value": null
+                        },
                         "voltage": {
                             "parameter": {
                                 "collection_type": 0,
@@ -4346,6 +4386,16 @@
                 "flux": {
                     "name": "QB5__flux",
                     "settings": {
+                        "target": {
+                            "parameter": {
+                                "collection_type": 0,
+                                "data_type": 1,
+                                "label": "Target flux",
+                                "name": "QB5__flux.target",
+                                "unit": "quanta"
+                            },
+                            "value": null
+                        },
                         "voltage": {
                             "parameter": {
                                 "collection_type": 0,
@@ -4567,6 +4617,16 @@
                 "flux": {
                     "name": "TC_1_3__flux",
                     "settings": {
+                        "target": {
+                            "parameter": {
+                                "collection_type": 0,
+                                "data_type": 1,
+                                "label": "Target flux",
+                                "name": "TC_1_3__flux.target",
+                                "unit": "quanta"
+                            },
+                            "value": null
+                        },
                         "voltage": {
                             "parameter": {
                                 "collection_type": 0,
@@ -5076,6 +5136,16 @@
                 "flux": {
                     "name": "TC_2_3__flux",
                     "settings": {
+                        "target": {
+                            "parameter": {
+                                "collection_type": 0,
+                                "data_type": 1,
+                                "label": "Target flux",
+                                "name": "TC_2_3__flux.target",
+                                "unit": "quanta"
+                            },
+                            "value": null
+                        },
                         "voltage": {
                             "parameter": {
                                 "collection_type": 0,
@@ -5585,6 +5655,16 @@
                 "flux": {
                     "name": "TC_3_4__flux",
                     "settings": {
+                        "target": {
+                            "parameter": {
+                                "collection_type": 0,
+                                "data_type": 1,
+                                "label": "Target flux",
+                                "name": "TC_3_4__flux.target",
+                                "unit": "quanta"
+                            },
+                            "value": null
+                        },
                         "voltage": {
                             "parameter": {
                                 "collection_type": 0,
@@ -6094,6 +6174,16 @@
                 "flux": {
                     "name": "TC_3_5__flux",
                     "settings": {
+                        "target": {
+                            "parameter": {
+                                "collection_type": 0,
+                                "data_type": 1,
+                                "label": "Target flux",
+                                "name": "TC_3_5__flux.target",
+                                "unit": "quanta"
+                            },
+                            "value": null
+                        },
                         "voltage": {
                             "parameter": {
                                 "collection_type": 0,

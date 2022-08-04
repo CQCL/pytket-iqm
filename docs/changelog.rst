@@ -1,12 +1,13 @@
 Changelog
 ~~~~~~~~~
 
-0.4.0 (May 2022)
-----------------
+0.4.0 (August 2022)
+-------------------
 
+* Updated iqm-client version requirement to 4.3.
 * IQMBackend initializer now requires an authentication server URL, which may be
   stored in config.
-* Updated pytket version requirement to 1.2.
+* Updated pytket version requirement to 1.5.
 * Support for python 3.10.
 
 0.3.0 (April 2022)

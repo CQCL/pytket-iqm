@@ -4,15 +4,7 @@ set -evu
 # single argument = root directory of module to test
 # Requires mypy >= 0.800
 
-MODULEDIR=$1
-
-# set MYPYPATH
-MYPYPATH="."
-for MOD in $(ls -d "$MODULEDIR"*); do
-    MOD_PATH="$(cd "$MOD" && pwd)"
-    MYPYPATH="$MYPYPATH:$MOD_PATH"
-done
-export MYPYPATH="$MYPYPATH"
+MYPYPATH=$1
 
 ROOT_INIT_FILE=$(python -c "from importlib.util import find_spec; print(find_spec('pytket').origin)")
 
