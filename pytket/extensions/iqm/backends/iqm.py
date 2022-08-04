@@ -260,7 +260,7 @@ class IQMBackend(Backend):
         if status == "pending":
             return CircuitStatus(StatusEnum.SUBMITTED)
         elif status == "ready":
-            measurements = run_result.measurements
+            measurements = run_result.measurements[0]
             shots = OutcomeArray.from_readouts(
                 np.array(
                     [[r[0] for r in rlist] for cbstr, rlist in measurements.items()],
