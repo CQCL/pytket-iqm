@@ -38,7 +38,7 @@ setup(
     license="Apache 2",
     packages=find_namespace_packages(include=["pytket.*"]),
     include_package_data=True,
-    install_requires=["pytket ~= 1.4", "iqm-client ~= 4.2"],
+    install_requires=["pytket ~= 1.5", "iqm-client == 4.3"],
     classifiers=[
         "Environment :: Console",
         "Programming Language :: Python :: 3.9",
