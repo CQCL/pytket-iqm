@@ -1,8 +1,8 @@
 Changelog
 ~~~~~~~~~
 
-0.4.0 (unreleased)
-------------------
+0.4.0 (August 2022)
+-------------------
 
 * Updated iqm-client version requirement to 4.3.
 * IQMBackend initializer now requires an authentication server URL, which may be
