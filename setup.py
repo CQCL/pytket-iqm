@@ -31,7 +31,11 @@ setup(
     author="TKET development team",
     author_email="tket-support@cambridgequantum.com",
     python_requires=">=3.9",
-    url="https://github.com/CQCL/pytket-iqm",
+    project_urls={
+        "Documentation": "https://cqcl.github.io/pytket-iqm/api/index.html",
+        "Source": "https://github.com/CQCL/pytket-iqm",
+        "Tracker": "https://github.com/CQCL/pytket-iqm/issues",
+    },
     description="Extension for pytket, providing access to IQM backends",
     long_description=open("README.md").read(),
     long_description_content_type="text/markdown",
