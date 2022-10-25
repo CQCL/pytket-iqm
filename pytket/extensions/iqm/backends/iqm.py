@@ -13,14 +13,12 @@
 # limitations under the License.
 
 import json
-from os import PathLike
 from typing import cast, Dict, List, Optional, Sequence, Tuple, Union
 from uuid import UUID
-from iqm_client.iqm_client import Circuit as IQMCircuit  # type: ignore
-from iqm_client.iqm_client import (  # type: ignore
+from iqm_client.iqm_client import Circuit as IQMCircuit
+from iqm_client.iqm_client import (
     Instruction,
     IQMClient,
-    SingleQubitMapping,
 )
 import numpy as np
 from pytket.backends import Backend, CircuitStatus, ResultHandle, StatusEnum
@@ -59,15 +57,13 @@ from pytket.utils import prepare_circuit
 from pytket.utils.outcomearray import OutcomeArray
 from .config import IQMConfig
 
-_GATE_SET = {OpType.PhasedX, OpType.CZ, OpType.Measure}
-
-# https://iqm-finland.github.io/cirq-on-iqm/api/cirq_iqm.devices.adonis.Adonis.html
-_DEFAULT_COUPLING = [
-    ("QB1", "QB3"),
-    ("QB2", "QB3"),
-    ("QB4", "QB3"),
-    ("QB5", "QB3"),
-]
+# Mapping of natively supported instructions' names to members of Pytket OpType
+_IQM_PYTKET_OP_MAP = {
+    "phased_rx": OpType.PhasedX,
+    "cz": OpType.CZ,
+    "measurement": OpType.Measure,
+    "barrier": OpType.Barrier,
+}
 
 
 class IqmAuthenticationError(Exception):
@@ -90,8 +86,7 @@ class IQMBackend(Backend):
     def __init__(
         self,
         url: str,
-        settings: PathLike,
-        arch: Optional[List[Tuple[str, str]]] = None,
+        arch: Optional[List[List[str]]] = None,
         auth_server_url: Optional[str] = None,
         username: Optional[str] = None,
         password: Optional[str] = None,
@@ -104,10 +99,7 @@ class IQMBackend(Backend):
         :py:meth:`pytket.extensions.iqm.set_iqm_config`.
 
         :param url: base URL for requests
-        :param settings: path of JSON file containing device settings
-        :param arch: list of couplings between the qubits defined in the device settings
-            (default: [("QB1", "QB3"), ("QB2", "QB3"), ("QB4", "QB3"), ("QB5", "QB3")],
-            i.e. a 5-qubit star topology centred on "QB3")
+        :param arch: list of couplings between the qubits defined
         :param auth_server_url: base URL of authentication server
         :param username: IQM username
         :param password: IQM password
@@ -127,33 +119,31 @@ class IQMBackend(Backend):
         if password is None:
             raise IqmAuthenticationError()
 
-        with open(settings) as f:
-            settings_json = json.load(f)
         self._client = IQMClient(
             self._url,
-            settings_json,
             auth_server_url=auth_server_url,
             username=username,
             password=password,
         )
-        self._qubits = [
-            _as_node(qb)
-            for qb in settings_json["subtrees"].keys()
-            if qb.startswith("QB")
+        self._quantum_architecture = self._client.get_quantum_architecture()
+        # convert operations to OpType in place
+        self._quantum_architecture.operations = [
+            _IQM_PYTKET_OP_MAP[op] for op in self._quantum_architecture.operations
         ]
+        self._qubits = [_as_node(qb) for qb in self._quantum_architecture.qubits]
         self._n_qubits = len(self._qubits)
         if arch is None:
-            arch = _DEFAULT_COUPLING
+            arch = self._quantum_architecture.qubit_connectivity
         coupling = [(_as_node(a), _as_node(b)) for (a, b) in arch]
         if any(qb not in self._qubits for couple in coupling for qb in couple):
             raise ValueError("Architecture contains qubits not in device")
         self._arch = Architecture(coupling)
         self._backendinfo = BackendInfo(
             type(self).__name__,
-            settings_json["name"],
+            self._quantum_architecture.name,
             __extension_version__,
             self._arch,
-            _GATE_SET,
+            set(self._quantum_architecture.operations),
         )
 
     @property
@@ -168,7 +158,7 @@ class IQMBackend(Backend):
             NoBarriersPredicate(),
             NoMidMeasurePredicate(),
             NoSymbolsPredicate(),
-            GateSetPredicate(_GATE_SET),
+            GateSetPredicate(set(self._quantum_architecture.operations)),
             ConnectivityPredicate(self._arch),
         ]
 
@@ -231,14 +221,13 @@ class IQMBackend(Backend):
             else:
                 c0, ppcirc_rep = c, None
             instrs = _translate_iqm(c0)
-            qm = [
-                SingleQubitMapping(logical_name=str(qb), physical_name=_as_name(qb))
-                for qb in c.qubits
-            ]
+            qm = {str(qb): _as_name(qb) for qb in c.qubits}
             iqmc = IQMCircuit(
                 name=c.name if c.name else f"circuit_{i}", instructions=instrs
             )
-            run_id = self._client.submit_circuits([iqmc], qm, shots=n_shots)
+            run_id = self._client.submit_circuits(
+                [iqmc], qubit_mapping=qm, shots=n_shots
+            )
             handles.append(ResultHandle(run_id.bytes, json.dumps(ppcirc_rep)))
         for handle in handles:
             self._cache[handle] = dict()
@@ -260,7 +249,7 @@ class IQMBackend(Backend):
         if status == "pending":
             return CircuitStatus(StatusEnum.SUBMITTED)
         elif status == "ready":
-            measurements = run_result.measurements[0]
+            measurements = cast(dict, run_result.measurements)[0]
             shots = OutcomeArray.from_readouts(
                 np.array(
                     [[r[0] for r in rlist] for cbstr, rlist in measurements.items()],
@@ -277,7 +266,7 @@ class IQMBackend(Backend):
             return CircuitStatus(StatusEnum.COMPLETED)
         else:
             assert status == "failed"
-            return CircuitStatus(StatusEnum.ERROR, run_result.message)
+            return CircuitStatus(StatusEnum.ERROR, cast(str, run_result.message))
 
     def get_result(self, handle: ResultHandle, **kwargs: KwargTypes) -> BackendResult:
         """
@@ -290,7 +279,7 @@ class IQMBackend(Backend):
             timeout = kwargs.get("timeout", 900)
             # Wait for job to finish; result will then be in the cache.
             run_id = UUID(bytes=cast(bytes, handle[0]))
-            self._client.wait_for_results(run_id, timeout_secs=timeout)
+            self._client.wait_for_results(run_id, timeout_secs=cast(float, timeout))
             circuit_status = self.circuit_status(handle)
             if circuit_status.status is StatusEnum.COMPLETED:
                 return cast(BackendResult, self._cache[handle]["result"])

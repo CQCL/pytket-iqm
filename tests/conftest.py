@@ -45,10 +45,7 @@ def fixture_authenticated_iqm_backend() -> IQMBackend:
     # - PYTKET_REMOTE_IQM_USERNAME
     # - PYTKET_REMOTE_IQM_APIKEY
 
-    # By default, the backend is created with the device settings in
-    # pytket-iqm/tests/demo_settings.json
     return IQMBackend(
-        settings=get_demo_settings_path(),
         url=get_demo_url(),
         auth_server_url=os.getenv("PYTKET_REMOTE_IQM_AUTH_SERVER_URL"),
         username=os.getenv("PYTKET_REMOTE_IQM_USERNAME"),
