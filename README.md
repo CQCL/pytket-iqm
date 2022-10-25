@@ -8,7 +8,7 @@ executed on [IQM](https://meetiqm.com/)'s quantum devices and simulators.
 
 ## Getting started
 
-`pytket-iqm` is available for Python 3.8, 3.9 and 3.10, on Linux, MacOS
+`pytket-iqm` is available for Python 3.8, 3.9 and 3.10, on Linux, macOS
 and Windows. To install, run:
 
 ```shell
@@ -53,11 +53,11 @@ print(result.get_shots())
 The IQM Client documentation includes the [set of currently supported
 instructions]
 (https://iqm-finland.github.io/iqm-client/api/iqm_client.iqm_client.html).
-`pytket-iqm` retrieves the set from the IQM backend during the initialization;
+`pytket-iqm` retrieves the set from the IQM backend during the initialisation;
 then `get_compiled_circuit()` takes care of compiling the circuit into the
 form suitable to run on the backend.
 
-During the backend initialization, `pytket-iqm` also retrieves the names of
+During the backend initialisation, `pytket-iqm` also retrieves the names of
 physical qubits and qubit connectivity. You can override the qubit connectivity
 by providing the `arch` parameter to `IQMBackend` constructor, but it generally
 does not make sense, since IQM server reports the valid quantum architecture
@@ -65,7 +65,7 @@ relevant to the given backend url.
 
 ## Bugs and feature requests
 
-Please file bugs and feature requests on the Github
+Please file bugs and feature requests on the GitHub
 [issue tracker](https://github.com/CQCL/pytket-iqm/issues).
 
 ## Development
