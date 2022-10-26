@@ -53,11 +53,10 @@ def test_iqm(authenticated_iqm_backend: IQMBackend) -> None:
     assert sum(counts.values()) == n_shots
 
 
-def test_invalid_cred(demo_settings_path: os.PathLike, demo_url: str) -> None:
+def test_invalid_cred(demo_url: str) -> None:
     with pytest.raises(Exception):
         _ = IQMBackend(
             url=demo_url,
-            settings=demo_settings_path,
             auth_server_url="https://cortex-demo.qc.iqm.fi/",
             username="invalid",
             password="invalid",
