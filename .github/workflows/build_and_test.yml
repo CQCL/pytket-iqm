@@ -20,7 +20,7 @@ on:
 env:
   PYTKET_REMOTE_IQM_AUTH_SERVER_URL: ${{ secrets.PYTKET_REMOTE_IQM_AUTH_SERVER_URL }}
   PYTKET_REMOTE_IQM_USERNAME: ${{ secrets.PYTKET_REMOTE_IQM_USERNAME }}
-  PYTKET_REMOTE_IQM_APIKEY: ${{ secrets.PYTKET_REMOTE_IQM_APIKEY }}
+  PYTKET_REMOTE_IQM_PASSWORD: ${{ secrets.PYTKET_REMOTE_IQM_PASSWORD }}
 
 jobs:
   iqm-checks:
@@ -43,17 +43,15 @@ jobs:
       if:  (matrix.os == 'macos-12') && (github.event_name == 'pull_request' || github.event_name == 'release' || contains(github.ref, 'refs/heads/wheel') || github.event_name == 'schedule')
       run: |
         ./.github/workflows/build-test mypy
-      # remote tests disabled because of https://github.com/CQCL/pytket-iqm/issues/20
-      # env:
-      #   PYTKET_RUN_REMOTE_TESTS: 1
+      env:
+        PYTKET_RUN_REMOTE_TESTS: 1
     - name: Build and test including remote checks (3.9) nomypy
       if:  (matrix.os != 'macos-12') && (github.event_name == 'pull_request' || github.event_name == 'release' || contains(github.ref, 'refs/heads/wheel') || github.event_name == 'schedule')
       shell: bash
       run: |
         ./.github/workflows/build-test nomypy
-      # remote tests disabled because of https://github.com/CQCL/pytket-iqm/issues/20
-      # env:
-      #   PYTKET_RUN_REMOTE_TESTS: 1
+      env:
+        PYTKET_RUN_REMOTE_TESTS: 1
     - name: Set up Python 3.10
       if: github.event_name == 'push' || github.event_name == 'pull_request' || github.event_name == 'schedule'
       uses: actions/setup-python@v4
