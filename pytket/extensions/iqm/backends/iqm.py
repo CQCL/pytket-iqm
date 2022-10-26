@@ -125,25 +125,22 @@ class IQMBackend(Backend):
             username=username,
             password=password,
         )
-        self._quantum_architecture = self._client.get_quantum_architecture()
-        # convert operations to OpType in place
-        self._quantum_architecture.operations = [
-            _IQM_PYTKET_OP_MAP[op] for op in self._quantum_architecture.operations
-        ]
-        self._qubits = [_as_node(qb) for qb in self._quantum_architecture.qubits]
+        _iqmqa = self._client.get_quantum_architecture()
+        self._operations = [_IQM_PYTKET_OP_MAP[op] for op in _iqmqa.operations]
+        self._qubits = [_as_node(qb) for qb in _iqmqa.qubits]
         self._n_qubits = len(self._qubits)
         if arch is None:
-            arch = self._quantum_architecture.qubit_connectivity
+            arch = _iqmqa.qubit_connectivity
         coupling = [(_as_node(a), _as_node(b)) for (a, b) in arch]
         if any(qb not in self._qubits for couple in coupling for qb in couple):
             raise ValueError("Architecture contains qubits not in device")
         self._arch = Architecture(coupling)
         self._backendinfo = BackendInfo(
-            type(self).__name__,
-            self._quantum_architecture.name,
-            __extension_version__,
-            self._arch,
-            set(self._quantum_architecture.operations),
+            name=type(self).__name__,
+            device_name=_iqmqa.name,
+            version=__extension_version__,
+            architecture=self._arch,
+            gate_set=set(self._operations),
         )
 
     @property
@@ -158,7 +155,7 @@ class IQMBackend(Backend):
             NoBarriersPredicate(),
             NoMidMeasurePredicate(),
             NoSymbolsPredicate(),
-            GateSetPredicate(set(self._quantum_architecture.operations)),
+            GateSetPredicate(set(self._operations)),
             ConnectivityPredicate(self._arch),
         ]
 
