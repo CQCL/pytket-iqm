@@ -121,7 +121,7 @@ By default, the remote tests, which run against the real backend server, are
 skipped. To enable them, set the following environment variables:
 
 ```shell
-export PYTKET_RUN_REMOTE_TESTS=true
+export PYTKET_RUN_REMOTE_TESTS=1
 export PYTKET_REMOTE_IQM_AUTH_SERVER_URL=https://auth.demo.qc.iqm.fi
 export PYTKET_REMOTE_IQM_USERNAME=YOUR_USERNAME
 export PYTKET_REMOTE_IQM_PASSWORD=YOUR_PASSWORD
