@@ -33,11 +33,11 @@ def fixture_authenticated_iqm_backend() -> IQMBackend:
     # The credentials are taken from the env variables:
     # - PYTKET_REMOTE_IQM_AUTH_SERVER_URL
     # - PYTKET_REMOTE_IQM_USERNAME
-    # - PYTKET_REMOTE_IQM_APIKEY
+    # - PYTKET_REMOTE_IQM_PASSWORD
 
     return IQMBackend(
         url=get_demo_url(),
         auth_server_url=os.getenv("PYTKET_REMOTE_IQM_AUTH_SERVER_URL"),
         username=os.getenv("PYTKET_REMOTE_IQM_USERNAME"),
-        password=os.getenv("PYTKET_REMOTE_IQM_APIKEY"),
+        password=os.getenv("PYTKET_REMOTE_IQM_PASSWORD"),
     )
