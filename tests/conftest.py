@@ -18,18 +18,8 @@ import pytest
 from pytket.extensions.iqm import IQMBackend
 
 
-def get_demo_settings_path() -> os.PathLike:
-    curr_file_path = Path(__file__).resolve().parent
-    return curr_file_path / "demo_settings.json"
-
-
 def get_demo_url() -> str:
     return "https://cortex-demo.qc.iqm.fi/"
-
-
-@pytest.fixture(name="demo_settings_path", scope="session")
-def fixture_demo_settings_path() -> os.PathLike:
-    return get_demo_settings_path()
 
 
 @pytest.fixture(name="demo_url", scope="session")
