@@ -7,7 +7,7 @@ Changelog
 * Updated iqm-client version requirement to 9.1.
 * IQMBackend initializer now does not accept a settings file.
 * IQMBackend initializer now retrieves device name and qubit names from backend
-server instead of configuration file.
+  server instead of configuration file.
 * IQMBackend initializer now retrieves qubit coupling (connectivity) and native
 gateset from backend server instead of hard-coded constants.
 
