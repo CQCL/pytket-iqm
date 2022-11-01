@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Changelog &mdash; pytket-iqm 0.4.0 documentation</title>
+  <title>Changelog &mdash; pytket-iqm 0.5.0 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -29,7 +29,7 @@
             <a href="index.html" class="icon icon-home"> pytket-iqm
           </a>
               <div class="version">
-                0.4
+                0.5
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -42,6 +42,7 @@
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="api.html">API documentation</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Changelog</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#november-2022">0.5.0 (November 2022)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#august-2022">0.4.0 (August 2022)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#april-2022">0.3.0 (April 2022)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#march-2022">0.2.0 (March 2022)</a></li>
@@ -53,6 +54,12 @@
 <ul>
 <li class="toctree-l1"><a class="reference external" href="https://cqcl.github.io/tket/pytket/api/index.html">pytket</a></li>
 <li class="toctree-l1"><a class="reference external" href="https://cqcl.github.io/pytket-extensions/api/index.html">pytket extensions</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Links:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/CQCL/pytket-iqm/issues">bug tracker</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/CQCL/pytket-iqm">GitHub</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://pypi.org/project/pytket-iqm/">PyPi</a></li>
 </ul>
 
         </div>
@@ -81,6 +88,18 @@
              
   <section id="changelog">
 <h1>Changelog<a class="headerlink" href="#changelog" title="Permalink to this headline"></a></h1>
+<section id="november-2022">
+<h2>0.5.0 (November 2022)<a class="headerlink" href="#november-2022" title="Permalink to this headline"></a></h2>
+<ul class="simple">
+<li><p>Updated iqm-client version requirement to 9.1.</p></li>
+<li><p>IQMBackend initializer now does not accept a settings file.</p></li>
+<li><p>IQMBackend initializer now retrieves device name and qubit names from backend
+server instead of configuration file.</p></li>
+<li><p>IQMBackend initializer now retrieves qubit coupling (connectivity) and native
+gateset from backend server instead of hard-coded constants.</p></li>
+<li><p>Updated pytket version requirement to 1.8.</p></li>
+</ul>
+</section>
 <section id="august-2022">
 <h2>0.4.0 (August 2022)<a class="headerlink" href="#august-2022" title="Permalink to this headline"></a></h2>
 <ul class="simple">
