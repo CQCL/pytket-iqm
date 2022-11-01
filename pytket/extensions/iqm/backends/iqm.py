@@ -99,7 +99,8 @@ class IQMBackend(Backend):
         :py:meth:`pytket.extensions.iqm.set_iqm_config`.
 
         :param url: base URL for requests
-        :param arch: list of couplings between the qubits defined
+        :param arch: Optional list of couplings between the qubits defined, if
+        not set the default value from the server is used.
         :param auth_server_url: base URL of authentication server
         :param username: IQM username
         :param password: IQM password
