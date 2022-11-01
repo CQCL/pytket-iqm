@@ -1,8 +1,8 @@
 Changelog
 ~~~~~~~~~
 
-0.5.0 (October 2022)
---------------------
+0.5.0 (November 2022)
+---------------------
 
 * Updated iqm-client version requirement to 9.1.
 * IQMBackend initializer now does not accept a settings file.
