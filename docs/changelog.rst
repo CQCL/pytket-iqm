@@ -1,8 +1,8 @@
 Changelog
 ~~~~~~~~~
 
-0.5.0 (October 2022)
--------------------
+0.5.0 (November 2022)
+---------------------
 
 * Updated iqm-client version requirement to 9.1.
 * IQMBackend initializer now does not accept a settings file.
@@ -10,6 +10,7 @@ Changelog
   server instead of configuration file.
 * IQMBackend initializer now retrieves qubit coupling (connectivity) and native
   gateset from backend server instead of hard-coded constants.
+* Updated pytket version requirement to 1.8.
 
 0.4.0 (August 2022)
 -------------------
