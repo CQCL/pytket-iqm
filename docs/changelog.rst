@@ -9,7 +9,7 @@ Changelog
 * IQMBackend initializer now retrieves device name and qubit names from backend
   server instead of configuration file.
 * IQMBackend initializer now retrieves qubit coupling (connectivity) and native
-gateset from backend server instead of hard-coded constants.
+  gateset from backend server instead of hard-coded constants.
 
 0.4.0 (August 2022)
 -------------------
