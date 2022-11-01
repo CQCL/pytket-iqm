@@ -89,7 +89,7 @@ tests and is accepted after review, it will be merged in.
 
 All code should be formatted using
 [black](https://black.readthedocs.io/en/stable/), with default options. This is
-checked on the CI. The CI is currently using version 22.3.
+checked on the CI.
 
 #### Type annotation
 
