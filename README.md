@@ -59,7 +59,7 @@ form suitable to run on the backend.
 
 During the backend initialisation, `pytket-iqm` also retrieves the names of
 physical qubits and qubit connectivity. You can override the qubit connectivity
-by providing the `arch` parameter to `IQMBackend` constructor, but it generally
+by providing the `arch` parameter to the `IQMBackend` constructor, but it generally
 does not make sense, since the IQM server reports the valid quantum architecture
 relevant to the given backend URL.
 
