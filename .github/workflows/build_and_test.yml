@@ -13,18 +13,21 @@ on:
     types:
       - created
       - edited
+  schedule:
+    # 04:00 every Tuesday morning
+    - cron: '0 4 * * 2'
 
 env:
   PYTKET_REMOTE_IQM_AUTH_SERVER_URL: ${{ secrets.PYTKET_REMOTE_IQM_AUTH_SERVER_URL }}
   PYTKET_REMOTE_IQM_USERNAME: ${{ secrets.PYTKET_REMOTE_IQM_USERNAME }}
-  PYTKET_REMOTE_IQM_APIKEY: ${{ secrets.PYTKET_REMOTE_IQM_APIKEY }}
+  PYTKET_REMOTE_IQM_PASSWORD: ${{ secrets.PYTKET_REMOTE_IQM_APIKEY }}
 
 jobs:
   iqm-checks:
     name: IQM - Build and test module
     strategy:
       matrix:
-        os: ['ubuntu-20.04', 'macos-11', 'windows-2019']
+        os: ['ubuntu-22.04', 'macos-12', 'windows-2022']
     runs-on: ${{ matrix.os }}
     steps:
     - uses: actions/checkout@v3
@@ -32,29 +35,31 @@ jobs:
         fetch-depth: '0'
     - run: git fetch --depth=1 origin +refs/tags/*:refs/tags/* +refs/heads/*:refs/remotes/origin/*
     - name: Set up Python 3.9
-      if: github.event_name == 'pull_request' || github.event_name == 'release' || contains(github.ref, 'refs/heads/wheel') || github.event_name == 'push'
-      uses: actions/setup-python@v3
+      if: github.event_name == 'pull_request' || github.event_name == 'release' || contains(github.ref, 'refs/heads/wheel') || github.event_name == 'schedule'
+      uses: actions/setup-python@v4
       with:
         python-version: '3.9'
     - name: Build and test including remote checks (3.9) mypy
-      if:  (matrix.os == 'macos-11') && ((github.event_name == 'pull_request' &&  github.event.pull_request.head.repo.full_name == github.repository) || github.event_name == 'release' || contains(github.ref, 'refs/heads/wheel') || github.event_name == 'push')
+      if:  (matrix.os == 'macos-12') && (github.event_name == 'pull_request' || github.event_name == 'release' || contains(github.ref, 'refs/heads/wheel') || github.event_name == 'schedule')
       run: |
         ./.github/workflows/build-test mypy
       env:
         PYTKET_RUN_REMOTE_TESTS: 1
     - name: Build and test including remote checks (3.9) nomypy
-      if:  (matrix.os != 'macos-11') && ((github.event_name == 'pull_request' &&  github.event.pull_request.head.repo.full_name == github.repository) || github.event_name == 'release' || contains(github.ref, 'refs/heads/wheel') || github.event_name == 'push')
+      if:  (matrix.os != 'macos-12') && (github.event_name == 'pull_request' || github.event_name == 'release' || contains(github.ref, 'refs/heads/wheel') || github.event_name == 'schedule')
+      shell: bash
       run: |
         ./.github/workflows/build-test nomypy
       env:
         PYTKET_RUN_REMOTE_TESTS: 1
     - name: Set up Python 3.10
-      if: github.event_name == 'push' || github.event_name == 'pull_request'
-      uses: actions/setup-python@v3
+      if: github.event_name == 'push' || github.event_name == 'pull_request' || github.event_name == 'schedule'
+      uses: actions/setup-python@v4
       with:
         python-version: '3.10'
     - name: Build and test (3.10)
-      if: github.event_name == 'push' || github.event_name == 'pull_request'
+      if: github.event_name == 'push' || github.event_name == 'pull_request' || github.event_name == 'schedule'
+      shell: bash
       run: |
         ./.github/workflows/build-test nomypy
     - uses: actions/upload-artifact@v3
@@ -63,11 +68,11 @@ jobs:
         name: artefacts
         path: wheelhouse/
     - name: Install docs dependencies
-      if:  (matrix.os == 'ubuntu-20.04') && (github.event_name == 'pull_request')
+      if:  (matrix.os == 'ubuntu-22.04') && (github.event_name == 'pull_request' || github.event_name == 'schedule' )
       run: |
         pip install -r .github/workflows/docs/requirements.txt
     - name: Build docs
-      if:  (matrix.os == 'ubuntu-20.04') && (github.event_name == 'pull_request')
+      if:  (matrix.os == 'ubuntu-22.04') && (github.event_name == 'pull_request' || github.event_name == 'schedule' )
       timeout-minutes: 20
       run: |
         ./.github/workflows/docs/check-build-docs
@@ -76,7 +81,7 @@ jobs:
     name: Publish to pypi
     if: github.event_name == 'release'
     needs: iqm-checks
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
     - name: Download all wheels
       uses: actions/download-artifact@v3
@@ -97,13 +102,13 @@ jobs:
     name: Build and publish docs
     if: github.event_name == 'release'
     needs: publish_to_pypi
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
     - uses: actions/checkout@v3
       with:
         fetch-depth: '0'
     - name: Set up Python 3.9
-      uses: actions/setup-python@v3
+      uses: actions/setup-python@v4
       with:
         python-version: '3.9'
     - name: Download all wheels
