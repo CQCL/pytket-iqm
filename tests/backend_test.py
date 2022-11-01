@@ -16,6 +16,7 @@ import os
 import pytest
 from requests import get
 from conftest import get_demo_url  # type: ignore
+from iqm_client.iqm_client import ClientAuthenticationError
 from pytket.circuit import Circuit  # type: ignore
 from pytket.backends import StatusEnum
 from pytket.extensions.iqm import IQMBackend
@@ -54,10 +55,10 @@ def test_iqm(authenticated_iqm_backend: IQMBackend) -> None:
 
 
 def test_invalid_cred(demo_url: str) -> None:
-    with pytest.raises(Exception):
+    with pytest.raises(ClientAuthenticationError):
         _ = IQMBackend(
             url=demo_url,
-            auth_server_url="https://cortex-demo.qc.iqm.fi/",
+            auth_server_url="https://auth.demo.qc.iqm.fi",
             username="invalid",
             password="invalid",
         )
