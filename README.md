@@ -36,7 +36,7 @@ backend = IQMBackend(
 	url="https://cortex-demo.qc.iqm.fi",
 	auth_server_url="https://auth.demo.qc.iqm.fi",
 	username="USERNAME",
-    password="PASSWORD",
+	password="PASSWORD",
 )
 
 circuit = Circuit(3, 3)
@@ -62,6 +62,10 @@ physical qubits and qubit connectivity. You can override the qubit connectivity
 by providing the `arch` parameter to the `IQMBackend` constructor, but it generally
 does not make sense, since the IQM server reports the valid quantum architecture
 relevant to the given backend URL.
+
+(Note: At the moment IQM does not provide a quantum computing service open to the 
+general public. Please contact our [sales team](https://www.meetiqm.com/contact/) 
+to set up your access to an IQM quantum computer.)
 
 ## Bugs and feature requests
 
