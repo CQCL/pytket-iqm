@@ -18,7 +18,7 @@ from pytket.extensions.iqm import IQMBackend
 
 
 def get_demo_url() -> str:
-    return "https://cortex-demo.qc.iqm.fi/"
+    return "https://demo.qc.iqm.fi/cocos"
 
 
 @pytest.fixture(name="demo_url", scope="session")

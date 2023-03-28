@@ -58,7 +58,7 @@ def test_invalid_cred(demo_url: str) -> None:
     with pytest.raises(ClientAuthenticationError):
         _ = IQMBackend(
             url=demo_url,
-            auth_server_url="https://auth.demo.qc.iqm.fi",
+            auth_server_url="https://demo.qc.iqm.fi/auth",
             username="invalid",
             password="invalid",
         )
