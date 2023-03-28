@@ -13,7 +13,7 @@
 # limitations under the License.
 
 import json
-from typing import cast, Any, Dict, List, Optional, Sequence, Tuple, Union
+from typing import cast, Dict, List, Optional, Sequence, Tuple, Union
 from uuid import UUID
 from iqm_client.iqm_client import Circuit as IQMCircuit
 from iqm_client.iqm_client import (
@@ -291,7 +291,8 @@ class IQMBackend(Backend):
     def get_metadata(self, handle: ResultHandle, **kwargs: KwargTypes) -> Metadata:
         """Return the metadata corresponding to the handle.
 
-        Use keyword arguments to specify parameters to be used in retrieving the metadata.
+        Use keyword arguments to specify parameters to be used in retrieving
+        the metadata.
 
         * `timeout`: maximum time to wait for remote job to finish
 

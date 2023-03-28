@@ -13,9 +13,9 @@
 # limitations under the License.
 
 import os
+from uuid import UUID
 import pytest
 from requests import get
-from uuid import UUID
 from conftest import get_demo_url  # type: ignore
 from iqm_client.iqm_client import ClientAuthenticationError, Metadata, RunRequest
 from pytket.circuit import Circuit  # type: ignore
