@@ -13,12 +13,13 @@
 # limitations under the License.
 
 import json
-from typing import cast, Dict, List, Optional, Sequence, Union
+from typing import cast, Dict, List, Optional, Sequence, Tuple, Union
 from uuid import UUID
 from iqm_client.iqm_client import Circuit as IQMCircuit
 from iqm_client.iqm_client import (
     Instruction,
     IQMClient,
+    Metadata,
 )
 import numpy as np
 from pytket.backends import Backend, CircuitStatus, ResultHandle, StatusEnum
@@ -221,7 +222,9 @@ class IQMBackend(Backend):
             instrs = _translate_iqm(c0)
             qm = {str(qb): _as_name(qb) for qb in c.qubits}
             iqmc = IQMCircuit(
-                name=c.name if c.name else f"circuit_{i}", instructions=instrs
+                name=c.name if c.name else f"circuit_{i}",
+                instructions=instrs,
+                metadata=None,
             )
             run_id = self._client.submit_circuits(
                 [iqmc], qubit_mapping=qm, shots=n_shots
@@ -285,6 +288,39 @@ class IQMBackend(Backend):
                 assert circuit_status.status is StatusEnum.ERROR
                 raise RuntimeError(circuit_status.message)
 
+    def get_metadata(self, handle: ResultHandle, **kwargs: KwargTypes) -> Metadata:
+        """Return the metadata corresponding to the handle.
+
+        Use keyword arguments to specify parameters to be used in retrieving
+        the metadata.
+
+        * `timeout`: maximum time to wait for remote job to finish
+
+        Example usage:
+            n_shots = 100
+            backend.run_circuit(circuit, n_shots=n_shots, timeout=30)
+            handle = backend.process_circuits([circuit], n_shots=n_shots)[0]
+            result = backend.get_result(handle)
+            metadata = backend.get_metadata(handle)
+            print([qm.physical_name for qm in metadata.request.qubit_mapping])
+
+        :param handle: handle to results
+        :type handle: ResultHandle
+        :return: Metadata corresponding to handle
+        :rtype: Metadata
+        """
+        self._check_handle_type(handle)
+        if handle in self._cache and "metadata" in self._cache[handle]:
+            return cast(Metadata, self._cache[handle]["metadata"])
+        # Wait for job to finish, capture metadata and store it in cache
+        timeout = kwargs.get("timeout", 900)
+        run_id = UUID(bytes=cast(bytes, handle[0]))
+        run_result = self._client.wait_for_results(
+            run_id, timeout_secs=cast(float, timeout)
+        )
+        self._cache[handle]["metadata"] = run_result.metadata
+        return cast(Metadata, self._cache[handle]["metadata"])
+
 
 def _as_node(qname: str) -> Node:
     assert qname.startswith("QB")
@@ -298,7 +334,7 @@ def _as_name(qnode: Node) -> str:
     return f"QB{qnode.index[0] + 1}"
 
 
-def _translate_iqm(circ: Circuit) -> List[Instruction]:
+def _translate_iqm(circ: Circuit) -> Tuple[Instruction, ...]:
     """Convert a circuit in the IQM gate set to IQM list representation."""
     instrs = []
     for cmd in circ.get_commands():
@@ -310,18 +346,27 @@ def _translate_iqm(circ: Circuit) -> List[Instruction]:
         if optype == OpType.PhasedX:
             instr = Instruction(
                 name="phased_rx",
-                qubits=[str(qbs[0])],
+                implementation=None,
+                qubits=(str(qbs[0]),),
                 args={"angle_t": 0.5 * params[0], "phase_t": 0.5 * params[1]},
             )
         elif optype == OpType.CZ:
-            instr = Instruction(name="cz", qubits=[str(qbs[0]), str(qbs[1])], args={})
+            instr = Instruction(
+                name="cz",
+                implementation=None,
+                qubits=(str(qbs[0]), str(qbs[1])),
+                args={},
+            )
         else:
             assert optype == OpType.Measure
             instr = Instruction(
-                name="measurement", qubits=[str(qbs[0])], args={"key": str(cbs[0])}
+                name="measurement",
+                implementation=None,
+                qubits=(str(qbs[0]),),
+                args={"key": str(cbs[0])},
             )
         instrs.append(instr)
-    return instrs
+    return tuple(instrs)
 
 
 def _iqm_rebase() -> BasePass:

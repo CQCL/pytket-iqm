@@ -33,8 +33,8 @@ from pytket.extensions.iqm import IQMBackend
 from pytket.circuit import Circuit
 
 backend = IQMBackend(
-	url="https://cortex-demo.qc.iqm.fi",
-	auth_server_url="https://auth.demo.qc.iqm.fi",
+	url="https://demo.qc.iqm.fi/cocos",
+	auth_server_url="https://demo.qc.iqm.fi/auth",
 	username="USERNAME",
 	password="PASSWORD",
 )
@@ -126,7 +126,7 @@ skipped. To enable them, set the following environment variables:
 
 ```shell
 export PYTKET_RUN_REMOTE_TESTS=1
-export PYTKET_REMOTE_IQM_AUTH_SERVER_URL=https://auth.demo.qc.iqm.fi
+export PYTKET_REMOTE_IQM_AUTH_SERVER_URL=https://demo.qc.iqm.fi/auth
 export PYTKET_REMOTE_IQM_USERNAME=YOUR_USERNAME
 export PYTKET_REMOTE_IQM_PASSWORD=YOUR_PASSWORD
 ```

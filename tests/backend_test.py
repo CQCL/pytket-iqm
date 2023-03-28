@@ -13,10 +13,11 @@
 # limitations under the License.
 
 import os
+from uuid import UUID
 import pytest
 from requests import get
 from conftest import get_demo_url  # type: ignore
-from iqm_client.iqm_client import ClientAuthenticationError
+from iqm_client.iqm_client import ClientAuthenticationError, Metadata, RunRequest
 from pytket.circuit import Circuit  # type: ignore
 from pytket.backends import StatusEnum
 from pytket.extensions.iqm import IQMBackend
@@ -32,20 +33,10 @@ if skip_remote_tests is False and get(get_demo_url()).status_code != 200:
 
 
 @pytest.mark.skipif(skip_remote_tests, reason=REASON)
-def test_iqm(authenticated_iqm_backend: IQMBackend) -> None:
+def test_iqm(authenticated_iqm_backend: IQMBackend, sample_circuit: Circuit) -> None:
     # Run a circuit on the demo device.
     b = authenticated_iqm_backend
-    c = Circuit(4, 4)
-    c.H(0)
-    c.CX(0, 1)
-    c.Rz(0.3, 2)
-    c.CSWAP(0, 1, 2)
-    c.CRz(0.4, 2, 3)
-    c.CY(1, 3)
-    c.ZZPhase(0.1, 2, 0)
-    c.Tdg(3)
-    c.measure_all()
-    c = b.get_compiled_circuit(c)
+    c = b.get_compiled_circuit(sample_circuit)
     n_shots = 10
     res = b.run_circuit(c, n_shots=n_shots, timeout=30)
     shots = res.get_shots()
@@ -54,24 +45,23 @@ def test_iqm(authenticated_iqm_backend: IQMBackend) -> None:
     assert sum(counts.values()) == n_shots
 
 
+@pytest.mark.skipif(skip_remote_tests, reason=REASON)
 def test_invalid_cred(demo_url: str) -> None:
     with pytest.raises(ClientAuthenticationError):
         _ = IQMBackend(
             url=demo_url,
-            auth_server_url="https://auth.demo.qc.iqm.fi",
+            auth_server_url="https://demo.qc.iqm.fi/auth",
             username="invalid",
             password="invalid",
         )
 
 
 @pytest.mark.skipif(skip_remote_tests, reason=REASON)
-def test_handles(authenticated_iqm_backend: IQMBackend) -> None:
+def test_handles(
+    authenticated_iqm_backend: IQMBackend, sample_circuit: Circuit
+) -> None:
     b = authenticated_iqm_backend
-    c = Circuit(2, 2)
-    c.H(0)
-    c.CX(0, 1)
-    c.measure_all()
-    c = b.get_compiled_circuit(c)
+    c = b.get_compiled_circuit(sample_circuit)
     n_shots = 5
     res = b.run_circuit(c, n_shots=n_shots, timeout=30)
     shots = res.get_shots()
@@ -89,20 +79,40 @@ def test_handles(authenticated_iqm_backend: IQMBackend) -> None:
     for handle in handles:
         assert b.circuit_status(handle).status == StatusEnum.COMPLETED
     for result in results:
-        assert result.get_shots().shape == (n_shots, 2)
+        assert result.get_shots().shape == (n_shots, c.n_qubits)
 
 
 @pytest.mark.skipif(skip_remote_tests, reason=REASON)
-def test_none_nshots(authenticated_iqm_backend: IQMBackend) -> None:
+def test_metadata(
+    authenticated_iqm_backend: IQMBackend, sample_circuit: Circuit
+) -> None:
     b = authenticated_iqm_backend
-    c = Circuit(2, 2)
-    c.H(0)
-    c.CX(0, 1)
-    c.measure_all()
-    c = b.get_compiled_circuit(c)
-    with pytest.raises(ValueError) as errorinfo:
+    c = b.get_compiled_circuit(sample_circuit)
+    n_shots = 5
+    b.run_circuit(c, n_shots=n_shots, timeout=30)
+    handle = b.process_circuits([c], n_shots=n_shots)[0]
+    b.get_result(handle)
+    metadata = b.get_metadata(handle)
+    assert isinstance(metadata, Metadata)
+    assert isinstance(metadata.calibration_set_id, UUID)
+    assert isinstance(metadata.request, RunRequest)
+    assert len(metadata.request.circuits) == 1
+    assert metadata.request.circuits[0].name == c.name
+    assert metadata.request.calibration_set_id is None
+    assert isinstance(metadata.request.qubit_mapping, list)
+    assert len(metadata.request.qubit_mapping) == c.n_qubits
+    assert metadata.request.shots == n_shots
+
+
+@pytest.mark.skipif(skip_remote_tests, reason=REASON)
+def test_none_nshots(
+    authenticated_iqm_backend: IQMBackend, sample_circuit: Circuit
+) -> None:
+    b = authenticated_iqm_backend
+    c = b.get_compiled_circuit(sample_circuit)
+    with pytest.raises(ValueError) as error_info:
         _ = b.process_circuits([c])
-    assert "Parameter n_shots is required" in str(errorinfo.value)
+    assert "Parameter n_shots is required" in str(error_info.value)
 
 
 @pytest.mark.skipif(skip_remote_tests, reason=REASON)
