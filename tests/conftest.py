@@ -1,4 +1,4 @@
-# Copyright 2020-2022 Cambridge Quantum Computing
+# Copyright 2020-2023 Cambridge Quantum Computing
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,10 +15,11 @@
 import os
 import pytest
 from pytket.extensions.iqm import IQMBackend
+from pytket.circuit import Circuit
 
 
 def get_demo_url() -> str:
-    return "https://cortex-demo.qc.iqm.fi/"
+    return "https://demo.qc.iqm.fi/cocos"
 
 
 @pytest.fixture(name="demo_url", scope="session")
@@ -40,3 +41,19 @@ def fixture_authenticated_iqm_backend() -> IQMBackend:
         username=os.getenv("PYTKET_REMOTE_IQM_USERNAME"),
         password=os.getenv("PYTKET_REMOTE_IQM_PASSWORD"),
     )
+
+
+@pytest.fixture(name="sample_circuit", scope="session")
+def fixture_sample_circuit() -> Circuit:
+    c = Circuit(4, 4)
+    c.H(0)
+    c.CX(0, 1)
+    c.Rz(0.3, 2)
+    c.CSWAP(0, 1, 2)
+    c.CRz(0.4, 2, 3)
+    c.CY(1, 3)
+    c.ZZPhase(0.1, 2, 0)
+    c.Tdg(3)
+    c.measure_all()
+    c.name = "test_circuit"
+    return c
