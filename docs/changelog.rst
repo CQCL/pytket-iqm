@@ -6,6 +6,8 @@ Changelog
 
 * Updated pytket version requirement to 1.13.
 * Updated iqm-client version requirement to 11.8.
+* New method ``IQMBackend.get_metadata()`` for reteieving metadata associated
+  with a ``ResultHandle``.
 
 0.5.0 (November 2022)
 ---------------------
