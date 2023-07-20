@@ -16,6 +16,7 @@ MODULE = "iqm"
 PYTKET_IQM_PYPI_LINK = "https://pypi.org/project/pytket-iqm/"
 PYTKET_IQM_GITHUB = "https://github.com/CQCL/pytket-iqm"
 
+
 def get_module_version():
     m = import_module(f"pytket.extensions.{MODULE}")
     return m._metadata.__extension_version__.split(".")
@@ -53,13 +54,10 @@ def build_module_docs():
         )
         content.append(f"\tpytket <{PYTKET_DOCS_LINK}>\n")
         content.append(f"\tpytket extensions <{PYTKET_EX_DOCS_LINK}>\n")
-        content.append(
-            "\n.. toctree::\n\t:caption: Links:\n\t:maxdepth: 1\n\n"
-        )
+        content.append("\n.. toctree::\n\t:caption: Links:\n\t:maxdepth: 1\n\n")
         content.append(f"\tbug tracker <{PYTKET_IQM_GITHUB}/issues>\n")
         content.append(f"\tGitHub <{PYTKET_IQM_GITHUB}>\n")
         content.append(f"\tPyPi <{PYTKET_IQM_PYPI_LINK}>\n")
-
 
     with open(index_rst, "w") as f:
         f.writelines(content)
@@ -71,7 +69,7 @@ def build_module_docs():
             "-D",
             f"project=pytket-{MODULE}",
             "-D",
-            f"copyright={datetime.date.today().year} Cambridge Quantum Computing",
+            f"copyright={datetime.date.today().year} Quantinuum",
             "-D",
             f"version={'.'.join(v[:2])}",
             "-D",
@@ -106,4 +104,4 @@ if __name__ == "__main__":
             MODULES_DIR / "docs" / "build",
             dest,
             dirs_exist_ok=True,
-            )
+        )
