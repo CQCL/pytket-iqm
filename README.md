@@ -44,9 +44,9 @@ circuit.H(0)
 circuit.CX(0, 1)
 circuit.CX(0, 2)
 circuit.measure_all()
-circuit = backend.get_compiled_circuit(circuit)
+compiled_circuit = backend.get_compiled_circuit(circuit)
 
-result = backend.run_circuit(c, n_shots=100)
+result = backend.run_circuit(compiled_circuit, n_shots=100)
 print(result.get_shots())
 ```
 
