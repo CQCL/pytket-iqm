@@ -28,9 +28,9 @@ from pytket.backends.backend_exceptions import CircuitNotRunError
 from pytket.backends.backendinfo import BackendInfo
 from pytket.backends.backendresult import BackendResult
 from pytket.backends.resulthandle import _ResultIdTuple
-from pytket.circuit import Circuit, Node, OpType  # type: ignore
+from pytket.circuit import Circuit, Node, OpType
 from pytket.extensions.iqm._metadata import __extension_version__
-from pytket.passes import (  # type: ignore
+from pytket.passes import (
     BasePass,
     SequencePass,
     SynthesiseTket,
@@ -43,7 +43,7 @@ from pytket.passes import (  # type: ignore
     DelayMeasures,
     SimplifyInitial,
 )
-from pytket.predicates import (  # type: ignore
+from pytket.predicates import (
     ConnectivityPredicate,
     GateSetPredicate,
     NoClassicalControlPredicate,
@@ -53,7 +53,7 @@ from pytket.predicates import (  # type: ignore
     NoSymbolsPredicate,
     Predicate,
 )
-from pytket.architecture import Architecture  # type: ignore
+from pytket.architecture import Architecture
 from pytket.utils import prepare_circuit
 from pytket.utils.outcomearray import OutcomeArray
 from .config import IQMConfig
@@ -111,13 +111,13 @@ class IQMBackend(Backend):
         config = IQMConfig.from_default_config_file()
 
         if auth_server_url is None:
-            auth_server_url = config.auth_server_url
+            auth_server_url = config.auth_server_url  # type: ignore
         if username is None:
-            username = config.username
+            username = config.username  # type: ignore
         if username is None:
             raise IqmAuthenticationError()
         if password is None:
-            password = config.password
+            password = config.password  # type: ignore
         if password is None:
             raise IqmAuthenticationError()
 
@@ -220,7 +220,7 @@ class IQMBackend(Backend):
             else:
                 c0, ppcirc_rep = c, None
             instrs = _translate_iqm(c0)
-            qm = {str(qb): _as_name(qb) for qb in c.qubits}
+            qm = {str(qb): _as_name(cast(Node, qb)) for qb in c.qubits}
             iqmc = IQMCircuit(
                 name=c.name if c.name else f"circuit_{i}",
                 instructions=instrs,
