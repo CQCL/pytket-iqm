@@ -15,8 +15,8 @@
 import json
 from typing import cast, Dict, List, Optional, Sequence, Tuple, Union
 from uuid import UUID
-from iqm_client.iqm_client import Circuit as IQMCircuit
-from iqm_client.iqm_client import (
+from iqm.iqm_client.iqm_client import Circuit as IQMCircuit
+from iqm.iqm_client.iqm_client import (
     Instruction,
     IQMClient,
     Metadata,
