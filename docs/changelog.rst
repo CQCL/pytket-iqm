@@ -1,6 +1,14 @@
 Changelog
 ~~~~~~~~~
 
+0.7.0 (October 2023)
+--------------------
+
+* Update pytket version requirement to 1.20.
+* Update iqm-client version requirement to 14.0.
+* Fix job status checks.
+* Add support for token-based authentication.
+
 0.6.0 (March 2023)
 ------------------
 

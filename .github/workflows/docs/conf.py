@@ -3,7 +3,8 @@
 # Configuration file for the Sphinx documentation builder.
 # See https://www.sphinx-doc.org/en/master/usage/configuration.html
 
-author = "Cambridge Quantum Computing Ltd"
+copyright = "2023 Quantinuum"
+author = "Quantinuum"
 
 extensions = [
     "sphinx.ext.autodoc",
@@ -13,21 +14,21 @@ extensions = [
     "sphinx_copybutton",
 ]
 
-pygments_style = "borland"
-
 html_theme = "sphinx_book_theme"
 
 html_theme_options = {
     "repository_url": "https://github.com/CQCL/pytket-iqm",
     "use_repository_button": True,
     "use_issues_button": True,
+    "logo": {
+        "image_light": "Quantinuum_logo_black.png",
+        "image_dark": "Quantinuum_logo_white.png",
+    },
 }
 
 html_static_path = ["_static"]
 
 html_css_files = ["custom.css"]
-
-html_logo = "Quantinuum_logo.png"
 
 # -- Extension configuration -------------------------------------------------
 
@@ -114,7 +115,6 @@ def correct_signature(
     signature: str,
     return_annotation: str,
 ) -> (str, str):
-
     new_signature = signature
     new_return_annotation = return_annotation
     for k, v in app.config.custom_internal_mapping.items():

@@ -13,14 +13,11 @@
 # limitations under the License.
 
 import json
+import os
 from typing import cast, Dict, List, Optional, Sequence, Tuple, Union
 from uuid import UUID
-from iqm_client.iqm_client import Circuit as IQMCircuit
-from iqm_client.iqm_client import (
-    Instruction,
-    IQMClient,
-    Metadata,
-)
+from iqm.iqm_client.iqm_client import Circuit as IQMCircuit
+from iqm.iqm_client.iqm_client import Instruction, IQMClient, Metadata, Status
 import numpy as np
 from pytket.backends import Backend, CircuitStatus, ResultHandle, StatusEnum
 from pytket.backends.backend import KwargTypes
@@ -28,9 +25,9 @@ from pytket.backends.backend_exceptions import CircuitNotRunError
 from pytket.backends.backendinfo import BackendInfo
 from pytket.backends.backendresult import BackendResult
 from pytket.backends.resulthandle import _ResultIdTuple
-from pytket.circuit import Circuit, Node, OpType  # type: ignore
+from pytket.circuit import Circuit, Node, OpType
 from pytket.extensions.iqm._metadata import __extension_version__
-from pytket.passes import (  # type: ignore
+from pytket.passes import (
     BasePass,
     SequencePass,
     SynthesiseTket,
@@ -43,7 +40,7 @@ from pytket.passes import (  # type: ignore
     DelayMeasures,
     SimplifyInitial,
 )
-from pytket.predicates import (  # type: ignore
+from pytket.predicates import (
     ConnectivityPredicate,
     GateSetPredicate,
     NoClassicalControlPredicate,
@@ -53,7 +50,7 @@ from pytket.predicates import (  # type: ignore
     NoSymbolsPredicate,
     Predicate,
 )
-from pytket.architecture import Architecture  # type: ignore
+from pytket.architecture import Architecture
 from pytket.utils import prepare_circuit
 from pytket.utils.outcomearray import OutcomeArray
 from .config import IQMConfig
@@ -95,9 +92,15 @@ class IQMBackend(Backend):
         """
         Construct a new IQM backend.
 
-        Requires a valid username and API key. These can either be provided as
-        parameters or set in config using
-        :py:meth:`pytket.extensions.iqm.set_iqm_config`.
+        Requires _either_ a valid auth server URL, username and password, _or_ a tokens
+        file.
+
+        Auth server URL, username and password can either be provided as parameters or
+        set in config using :py:meth:`pytket.extensions.iqm.set_iqm_config`.
+
+        Path to the tokens file is read from the environmment variable
+        ``IQM_TOKENS_FILE``. If set, this overrides any other credentials provided as
+        arguments.
 
         :param url: base URL for requests
         :param arch: Optional list of couplings between the qubits defined, if
@@ -111,22 +114,24 @@ class IQMBackend(Backend):
         config = IQMConfig.from_default_config_file()
 
         if auth_server_url is None:
-            auth_server_url = config.auth_server_url
+            auth_server_url = config.auth_server_url  # type: ignore
+        tokens_file = os.getenv("IQM_TOKENS_FILE")
         if username is None:
-            username = config.username
-        if username is None:
-            raise IqmAuthenticationError()
+            username = config.username  # type: ignore
         if password is None:
-            password = config.password
-        if password is None:
+            password = config.password  # type: ignore
+        if (username is None or password is None) and tokens_file is None:
             raise IqmAuthenticationError()
 
-        self._client = IQMClient(
-            self._url,
-            auth_server_url=auth_server_url,
-            username=username,
-            password=password,
-        )
+        if tokens_file is None:
+            self._client = IQMClient(
+                self._url,
+                auth_server_url=auth_server_url,
+                username=username,
+                password=password,
+            )
+        else:
+            self._client = IQMClient(self._url, tokens_file=tokens_file)
         _iqmqa = self._client.get_quantum_architecture()
         self._operations = [_IQM_PYTKET_OP_MAP[op] for op in _iqmqa.operations]
         self._qubits = [_as_node(qb) for qb in _iqmqa.qubits]
@@ -220,7 +225,7 @@ class IQMBackend(Backend):
             else:
                 c0, ppcirc_rep = c, None
             instrs = _translate_iqm(c0)
-            qm = {str(qb): _as_name(qb) for qb in c.qubits}
+            qm = {str(qb): _as_name(cast(Node, qb)) for qb in c.qubits}
             iqmc = IQMCircuit(
                 name=c.name if c.name else f"circuit_{i}",
                 instructions=instrs,
@@ -247,9 +252,9 @@ class IQMBackend(Backend):
         run_id = UUID(bytes=cast(bytes, handle[0]))
         run_result = self._client.get_run(run_id)
         status = run_result.status
-        if status == "pending":
+        if status == Status.PENDING_EXECUTION:
             return CircuitStatus(StatusEnum.SUBMITTED)
-        elif status == "ready":
+        elif status == Status.READY:
             measurements = cast(dict, run_result.measurements)[0]
             shots = OutcomeArray.from_readouts(
                 np.array(
@@ -266,7 +271,7 @@ class IQMBackend(Backend):
             )
             return CircuitStatus(StatusEnum.COMPLETED)
         else:
-            assert status == "failed"
+            assert status == Status.FAILED
             return CircuitStatus(StatusEnum.ERROR, cast(str, run_result.message))
 
     def get_result(self, handle: ResultHandle, **kwargs: KwargTypes) -> BackendResult:
