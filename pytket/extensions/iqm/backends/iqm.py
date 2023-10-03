@@ -16,11 +16,7 @@ import json
 from typing import cast, Dict, List, Optional, Sequence, Tuple, Union
 from uuid import UUID
 from iqm.iqm_client.iqm_client import Circuit as IQMCircuit
-from iqm.iqm_client.iqm_client import (
-    Instruction,
-    IQMClient,
-    Metadata,
-)
+from iqm.iqm_client.iqm_client import Instruction, IQMClient, Metadata, Status
 import numpy as np
 from pytket.backends import Backend, CircuitStatus, ResultHandle, StatusEnum
 from pytket.backends.backend import KwargTypes
@@ -247,9 +243,9 @@ class IQMBackend(Backend):
         run_id = UUID(bytes=cast(bytes, handle[0]))
         run_result = self._client.get_run(run_id)
         status = run_result.status
-        if status == "pending":
+        if status == Status.PENDING_EXECUTION:
             return CircuitStatus(StatusEnum.SUBMITTED)
-        elif status == "ready":
+        elif status == Status.READY:
             measurements = cast(dict, run_result.measurements)[0]
             shots = OutcomeArray.from_readouts(
                 np.array(
@@ -266,7 +262,7 @@ class IQMBackend(Backend):
             )
             return CircuitStatus(StatusEnum.COMPLETED)
         else:
-            assert status == "failed"
+            assert status == Status.FAILED
             return CircuitStatus(StatusEnum.ERROR, cast(str, run_result.message))
 
     def get_result(self, handle: ResultHandle, **kwargs: KwargTypes) -> BackendResult:
