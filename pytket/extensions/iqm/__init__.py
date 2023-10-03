@@ -16,6 +16,6 @@
 """
 
 # _metadata.py is copied to the folder after installation.
-from ._metadata import __extension_version__, __extension_name__  # type: ignore
+from ._metadata import __extension_version__, __extension_name__
 from .backends import IQMBackend
 from .backends.config import IQMConfig, set_iqm_config

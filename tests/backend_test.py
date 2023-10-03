@@ -17,8 +17,8 @@ from uuid import UUID
 import pytest
 from requests import get
 from conftest import get_demo_url  # type: ignore
-from iqm_client.iqm_client import ClientAuthenticationError, Metadata, RunRequest
-from pytket.circuit import Circuit  # type: ignore
+from iqm.iqm_client.iqm_client import ClientAuthenticationError, Metadata, RunRequest
+from pytket.circuit import Circuit
 from pytket.backends import StatusEnum
 from pytket.extensions.iqm import IQMBackend
 
