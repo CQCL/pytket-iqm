@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import json
+import os
 from typing import cast, Dict, List, Optional, Sequence, Tuple, Union
 from uuid import UUID
 from iqm.iqm_client.iqm_client import Circuit as IQMCircuit
@@ -91,9 +92,15 @@ class IQMBackend(Backend):
         """
         Construct a new IQM backend.
 
-        Requires a valid username and API key. These can either be provided as
-        parameters or set in config using
-        :py:meth:`pytket.extensions.iqm.set_iqm_config`.
+        Requires _either_ a valid auth server URL, username and password, _or_ a tokens
+        file.
+
+        Auth server URL, username and password can either be provided as parameters or
+        set in config using :py:meth:`pytket.extensions.iqm.set_iqm_config`.
+
+        Path to the tokens file is read from the environmment variable
+        ``IQM_TOKENS_FILE``. If set, this overrides any other credentials provided as
+        arguments.
 
         :param url: base URL for requests
         :param arch: Optional list of couplings between the qubits defined, if
@@ -108,21 +115,23 @@ class IQMBackend(Backend):
 
         if auth_server_url is None:
             auth_server_url = config.auth_server_url  # type: ignore
+        tokens_file = os.getenv("IQM_TOKENS_FILE")
         if username is None:
             username = config.username  # type: ignore
-        if username is None:
-            raise IqmAuthenticationError()
         if password is None:
             password = config.password  # type: ignore
-        if password is None:
+        if (username is None or password is None) and tokens_file is None:
             raise IqmAuthenticationError()
 
-        self._client = IQMClient(
-            self._url,
-            auth_server_url=auth_server_url,
-            username=username,
-            password=password,
-        )
+        if tokens_file is None:
+            self._client = IQMClient(
+                self._url,
+                auth_server_url=auth_server_url,
+                username=username,
+                password=password,
+            )
+        else:
+            self._client = IQMClient(self._url, tokens_file=tokens_file)
         _iqmqa = self._client.get_quantum_architecture()
         self._operations = [_IQM_PYTKET_OP_MAP[op] for op in _iqmqa.operations]
         self._qubits = [_as_node(qb) for qb in _iqmqa.qubits]
