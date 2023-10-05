@@ -182,12 +182,6 @@ class IQMBackend(Backend):
         passes.append(DelayMeasures())
         passes.append(self.rebase_pass())
         passes.append(RemoveRedundancies())
-        if optimisation_level >= 1:
-            passes.append(
-                SimplifyInitial(
-                    allow_classical=False, create_all_qubits=True, xcirc=_xcirc
-                )
-            )
         return SequencePass(passes)
 
     @property
@@ -203,7 +197,13 @@ class IQMBackend(Backend):
     ) -> List[ResultHandle]:
         """
         See :py:meth:`pytket.backends.Backend.process_circuits`.
-        Supported kwargs: `postprocess`.
+
+        Supported `kwargs`:
+        - `postprocess`: apply end-of-circuit simplifications and classical
+          postprocessing to improve fidelity of results (bool, default False)
+        - `simplify_initial`: apply the pytket ``SimplifyInitial`` pass to improve
+          fidelity of results assuming all qubits initialized to zero (bool, default
+          False)
         """
         circuits = list(circuits)
         n_shots_list = Backend._get_n_shots_as_list(
@@ -216,6 +216,7 @@ class IQMBackend(Backend):
             self._check_all_circuits(circuits)
 
         postprocess = kwargs.get("postprocess", False)
+        simplify_initial = kwargs.get("postprocess", False)
 
         handles = []
         for i, (c, n_shots) in enumerate(zip(circuits, n_shots_list)):
@@ -224,6 +225,10 @@ class IQMBackend(Backend):
                 ppcirc_rep = ppcirc.to_dict()
             else:
                 c0, ppcirc_rep = c, None
+            if simplify_initial:
+                SimplifyInitial(
+                    allow_classical=False, create_all_qubits=True, xcirc=_xcirc
+                ).apply(c0)
             instrs = _translate_iqm(c0)
             qm = {str(qb): _as_name(cast(Node, qb)) for qb in c.qubits}
             iqmc = IQMCircuit(
