@@ -114,12 +114,12 @@ class IQMBackend(Backend):
         config = IQMConfig.from_default_config_file()
 
         if auth_server_url is None:
-            auth_server_url = config.auth_server_url  # type: ignore
+            auth_server_url = config.auth_server_url
         tokens_file = os.getenv("IQM_TOKENS_FILE")
         if username is None:
-            username = config.username  # type: ignore
+            username = config.username
         if password is None:
-            password = config.password  # type: ignore
+            password = config.password
         if (username is None or password is None) and tokens_file is None:
             raise IqmAuthenticationError()
 
