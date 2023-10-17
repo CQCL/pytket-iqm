@@ -48,9 +48,9 @@ def set_iqm_config(
     """Set default value for IQM API token."""
     config = IQMConfig.from_default_config_file()
     if auth_server_url is not None:
-        config.auth_server_url = auth_server_url  # type: ignore
+        config.auth_server_url = auth_server_url
     if username is not None:
-        config.username = username  # type: ignore
+        config.username = username
     if password is not None:
-        config.password = password  # type: ignore
+        config.password = password
     config.update_default_config_file()
