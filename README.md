@@ -1,6 +1,6 @@
 # pytket-iqm
 
-[Pytket](https://cqcl.github.io/tket/pytket/api/index.html) is a python module
+[Pytket](https://tket.quantinuum.com/api-docs/index.html) is a python module
 providing an extensive set of tools for compiling and executing quantum circuits.
 
 `pytket-iqm` is an extension to `pytket` that allows `pytket` circuits to be
@@ -19,11 +19,11 @@ This will install `pytket` if it isn't already installed, and add new classes
 and methods into the `pytket.extensions` namespace.
 
 API documentation is available
-[here](https://cqcl.github.io/pytket-iqm/api/index.html).
+[here](https://tket.quantinuum.com/extensions/pytket-iqm/api/index.html).
 
 Under the hood, `pytket-iqm` uses `iqm-client` to interact with the devices. See
 the IQM Client [documentation](https://iqm-finland.github.io/iqm-client/) and
-Pytket [documentation](https://cqcl.github.io/tket/pytket/api/) for more info.
+Pytket [documentation](https://tket.quantinuum.com/api-docs/) for more info.
 
 To use the integration, initialise an `IQMBackend`, construct a Pytket circuit,
 compile it and run. Here is a small example of running a GHZ state circuit:
