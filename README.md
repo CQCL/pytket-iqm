@@ -19,7 +19,7 @@ This will install `pytket` if it isn't already installed, and add new classes
 and methods into the `pytket.extensions` namespace.
 
 API documentation is available
-[here](https://tket.quantinuum.com/extensions/pytket-iqm/api/index.html).
+[here](https://tket.quantinuum.com/extensions/pytket-iqm/).
 
 Under the hood, `pytket-iqm` uses `iqm-client` to interact with the devices. See
 the IQM Client [documentation](https://iqm-finland.github.io/iqm-client/) and
