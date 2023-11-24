@@ -32,7 +32,7 @@ setup(
     author_email="tket-support@cambridgequantum.com",
     python_requires=">=3.9",
     project_urls={
-        "Documentation": "https://cqcl.github.io/pytket-iqm/api/index.html",
+        "Documentation": "https://tket.quantinuum.com/extensions/pytket-iqm/api/index.html",
         "Source": "https://github.com/CQCL/pytket-iqm",
         "Tracker": "https://github.com/CQCL/pytket-iqm/issues",
     },
@@ -42,7 +42,7 @@ setup(
     license="Apache 2",
     packages=find_namespace_packages(include=["pytket.*"]),
     include_package_data=True,
-    install_requires=["pytket ~= 1.21", "iqm-client ~= 14.0"],
+    install_requires=["pytket ~= 1.22", "iqm-client ~= 14.0"],
     classifiers=[
         "Environment :: Console",
         "Programming Language :: Python :: 3.9",
