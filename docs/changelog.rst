@@ -1,6 +1,10 @@
 Changelog
 ~~~~~~~~~
 
+Unreleased
+----------
+* Add some additional post-routing optimisations to the default compilation pass for `optimisation_level=2`.
+
 0.9.0 (November 2023)
 ---------------------
 
