@@ -39,6 +39,8 @@ from pytket.passes import (
     DefaultMappingPass,
     DelayMeasures,
     SimplifyInitial,
+    KAKDecomposition,
+    CliffordSimp,
 )
 from pytket.predicates import (
     ConnectivityPredicate,
@@ -180,6 +182,10 @@ class IQMBackend(Backend):
             passes.append(FullPeepholeOptimise())
         passes.append(DefaultMappingPass(self._arch))
         passes.append(DelayMeasures())
+        if optimisation_level == 2:
+            passes.append(KAKDecomposition(allow_swaps=False))
+            passes.append(CliffordSimp(allow_swaps=False))
+            passes.append(SynthesiseTket())
         passes.append(self.rebase_pass())
         passes.append(RemoveRedundancies())
         return SequencePass(passes)
