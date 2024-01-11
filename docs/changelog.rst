@@ -1,8 +1,10 @@
 Changelog
 ~~~~~~~~~
 
-Unreleased
-----------
+0.10.0 (January 2024)
+---------------------
+
+* Updated pytket version requirement to 1.23.
 * Add some additional post-routing optimisations to the default compilation pass for `optimisation_level=2`.
 * Updated iqm-client version requirement to 15.2.
 
