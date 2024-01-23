@@ -8,7 +8,7 @@ executed on [IQM](https://meetiqm.com/)'s quantum devices and simulators.
 
 ## Getting started
 
-`pytket-iqm` is available for Python 3.8, 3.9 and 3.10, on Linux, macOS
+`pytket-iqm` is available for Python 3.10, 3.11 and 3.12, on Linux, macOS
 and Windows. To install, run:
 
 ```shell
