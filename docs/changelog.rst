@@ -1,6 +1,13 @@
 Changelog
 ~~~~~~~~~
 
+Unreleased
+----------
+
+* Updated pytket version requirement to 1.25.
+* Updated iqm-client version requirement to 16.1.
+
+
 0.11.0 (January 2024)
 ---------------------
 
