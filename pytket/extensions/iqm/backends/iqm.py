@@ -61,7 +61,7 @@ from .config import IQMConfig
 _IQM_PYTKET_OP_MAP = {
     "prx": OpType.PhasedX,
     "cz": OpType.CZ,
-    "measurement": OpType.Measure,
+    "measure": OpType.Measure,
     "barrier": OpType.Barrier,
 }
 
@@ -376,7 +376,7 @@ def _translate_iqm(circ: Circuit) -> Tuple[Instruction, ...]:
         else:
             assert optype == OpType.Measure
             instr = Instruction(
-                name="measurement",
+                name="measure",
                 implementation=None,
                 qubits=(str(qbs[0]),),
                 args={"key": str(cbs[0])},
