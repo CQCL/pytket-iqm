@@ -59,9 +59,9 @@ from .config import IQMConfig
 
 # Mapping of natively supported instructions' names to members of Pytket OpType
 _IQM_PYTKET_OP_MAP = {
-    "phased_rx": OpType.PhasedX,
+    "prx": OpType.PhasedX,
     "cz": OpType.CZ,
-    "measurement": OpType.Measure,
+    "measure": OpType.Measure,
     "barrier": OpType.Barrier,
 }
 
@@ -361,7 +361,7 @@ def _translate_iqm(circ: Circuit) -> Tuple[Instruction, ...]:
         params = op.params
         if optype == OpType.PhasedX:
             instr = Instruction(
-                name="phased_rx",
+                name="prx",
                 implementation=None,
                 qubits=(str(qbs[0]),),
                 args={"angle_t": 0.5 * params[0], "phase_t": 0.5 * params[1]},
@@ -376,7 +376,7 @@ def _translate_iqm(circ: Circuit) -> Tuple[Instruction, ...]:
         else:
             assert optype == OpType.Measure
             instr = Instruction(
-                name="measurement",
+                name="measure",
                 implementation=None,
                 qubits=(str(qbs[0]),),
                 args={"key": str(cbs[0])},
