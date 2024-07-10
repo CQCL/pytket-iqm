@@ -6,6 +6,9 @@ providing an extensive set of tools for compiling and executing quantum circuits
 `pytket-iqm` is an extension to `pytket` that allows `pytket` circuits to be
 executed on [IQM](https://meetiqm.com/)'s quantum devices and simulators.
 
+Some useful links:
+- [API Documentation](https://tket.quantinuum.com/extensions/pytket-iqm/)
+
 ## Getting started
 
 `pytket-iqm` is available for Python 3.10, 3.11 and 3.12, on Linux, macOS
