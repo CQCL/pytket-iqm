@@ -1,5 +1,8 @@
 # pytket-iqm
 
+[![Slack](https://img.shields.io/badge/Slack-4A154B?style=for-the-badge&logo=slack&logoColor=white)](https://tketusers.slack.com/join/shared_invite/zt-18qmsamj9-UqQFVdkRzxnXCcKtcarLRA#)
+[![Stack Exchange](https://img.shields.io/badge/StackExchange-%23ffffff.svg?style=for-the-badge&logo=StackExchange)](https://quantumcomputing.stackexchange.com/tags/pytket)
+
 [Pytket](https://tket.quantinuum.com/api-docs/index.html) is a python module
 providing an extensive set of tools for compiling and executing quantum circuits.
 
