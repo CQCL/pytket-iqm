@@ -78,6 +78,8 @@ jobs:
       with:
         name: artefact-${{ matrix.os }}
         path: wheelhouse/
+    - name: install poetry
+      run: pip install poetry
     - name: Install docs dependencies
       if:  (matrix.os == 'ubuntu-22.04') && (github.event_name == 'pull_request' || github.event_name == 'schedule' )
       run: |
@@ -88,7 +90,8 @@ jobs:
       if:  (matrix.os == 'ubuntu-22.04') && (github.event_name == 'pull_request' || github.event_name == 'schedule' )
       timeout-minutes: 20
       run: |
-        ./.github/workflows/docs/check-build-docs
+        cd docs
+        poetry run bash ./build-docs.sh
 
   publish_to_pypi:
     name: Publish to pypi
