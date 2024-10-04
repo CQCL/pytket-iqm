@@ -14,11 +14,15 @@
 
 import json
 import os
-from typing import cast, Dict, List, Optional, Sequence, Tuple, Union
+from collections.abc import Sequence
+from typing import Dict, List, Optional, Tuple, Union, cast
 from uuid import UUID
+
+import numpy as np
+
 from iqm.iqm_client.iqm_client import Circuit as IQMCircuit
 from iqm.iqm_client.iqm_client import Instruction, IQMClient, Metadata, Status
-import numpy as np
+from pytket.architecture import Architecture
 from pytket.backends import Backend, CircuitStatus, ResultHandle, StatusEnum
 from pytket.backends.backend import KwargTypes
 from pytket.backends.backend_exceptions import CircuitNotRunError
@@ -29,32 +33,32 @@ from pytket.circuit import Circuit, Node, OpType
 from pytket.extensions.iqm._metadata import __extension_version__
 from pytket.passes import (
     BasePass,
-    SequencePass,
-    SynthesiseTket,
-    FullPeepholeOptimise,
-    FlattenRegisters,
-    RebaseCustom,
+    CliffordSimp,
     DecomposeBoxes,
-    RemoveRedundancies,
     DefaultMappingPass,
     DelayMeasures,
-    SimplifyInitial,
+    FlattenRegisters,
+    FullPeepholeOptimise,
     KAKDecomposition,
-    CliffordSimp,
+    RebaseCustom,
+    RemoveRedundancies,
+    SequencePass,
+    SimplifyInitial,
+    SynthesiseTket,
 )
 from pytket.predicates import (
     ConnectivityPredicate,
     GateSetPredicate,
+    NoBarriersPredicate,
     NoClassicalControlPredicate,
     NoFastFeedforwardPredicate,
-    NoBarriersPredicate,
     NoMidMeasurePredicate,
     NoSymbolsPredicate,
     Predicate,
 )
-from pytket.architecture import Architecture
 from pytket.utils import prepare_circuit
 from pytket.utils.outcomearray import OutcomeArray
+
 from .config import IQMConfig
 
 # Mapping of natively supported instructions' names to members of Pytket OpType

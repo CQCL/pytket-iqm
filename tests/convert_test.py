@@ -13,7 +13,9 @@
 # limitations under the License.
 
 import os
+
 import numpy as np
+
 from pytket.circuit import Circuit, OpType
 from pytket.extensions.iqm.backends.iqm import _iqm_rebase
 

@@ -14,8 +14,9 @@
 
 """IQM config."""
 
-from typing import Any, Dict, Optional, Type, ClassVar
 from dataclasses import dataclass
+from typing import Any, ClassVar, Dict, Optional, Type
+
 from pytket.config import PytketExtConfig
 
 
