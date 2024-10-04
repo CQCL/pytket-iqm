@@ -15,7 +15,7 @@
 import json
 import os
 from collections.abc import Sequence
-from typing import Dict, List, Optional, Tuple, Union, cast
+from typing import Optional, Union, cast
 from uuid import UUID
 
 import numpy as np
@@ -90,7 +90,7 @@ class IQMBackend(Backend):
     def __init__(
         self,
         url: str,
-        arch: Optional[List[List[str]]] = None,
+        arch: Optional[list[list[str]]] = None,
         auth_server_url: Optional[str] = None,
         username: Optional[str] = None,
         password: Optional[str] = None,
@@ -161,7 +161,7 @@ class IQMBackend(Backend):
         return self._backendinfo
 
     @property
-    def required_predicates(self) -> List[Predicate]:
+    def required_predicates(self) -> list[Predicate]:
         return [
             NoClassicalControlPredicate(),
             NoFastFeedforwardPredicate(),
@@ -204,7 +204,7 @@ class IQMBackend(Backend):
         n_shots: Union[None, int, Sequence[Optional[int]]] = None,
         valid_check: bool = True,
         **kwargs: KwargTypes,
-    ) -> List[ResultHandle]:
+    ) -> list[ResultHandle]:
         """
         See :py:meth:`pytket.backends.Backend.process_circuits`.
 
@@ -255,7 +255,7 @@ class IQMBackend(Backend):
         return handles
 
     def _update_cache_result(
-        self, handle: ResultHandle, result_dict: Dict[str, BackendResult]
+        self, handle: ResultHandle, result_dict: dict[str, BackendResult]
     ) -> None:
         if handle in self._cache:
             self._cache[handle].update(result_dict)
@@ -354,7 +354,7 @@ def _as_name(qnode: Node) -> str:
     return f"QB{qnode.index[0] + 1}"
 
 
-def _translate_iqm(circ: Circuit) -> Tuple[Instruction, ...]:
+def _translate_iqm(circ: Circuit) -> tuple[Instruction, ...]:
     """Convert a circuit in the IQM gate set to IQM list representation."""
     instrs = []
     for cmd in circ.get_commands():
@@ -397,11 +397,12 @@ def _iqm_rebase() -> BasePass:
     c_cx.add_gate(OpType.PhasedX, [0.5, 0.5], [1])
 
     # TK1 replacement
-    c_tk1 = (
-        lambda a, b, c: Circuit(1)
-        .add_gate(OpType.PhasedX, [-1, (a - c) / 2], [0])
-        .add_gate(OpType.PhasedX, [1 + b, a], [0])
-    )
+    def c_tk1(a, b, c):
+        return (
+            Circuit(1)
+            .add_gate(OpType.PhasedX, [-1, (a - c) / 2], [0])
+            .add_gate(OpType.PhasedX, [1 + b, a], [0])
+        )
 
     return RebaseCustom({OpType.CZ, OpType.PhasedX}, c_cx, c_tk1)
 

@@ -15,7 +15,7 @@
 """IQM config."""
 
 from dataclasses import dataclass
-from typing import Any, ClassVar, Dict, Optional, Type
+from typing import Any, ClassVar, Optional
 
 from pytket.config import PytketExtConfig
 
@@ -32,7 +32,7 @@ class IQMConfig(PytketExtConfig):
 
     @classmethod
     def from_extension_dict(
-        cls: Type["IQMConfig"], ext_dict: Dict[str, Any]
+        cls: type["IQMConfig"], ext_dict: dict[str, Any]
     ) -> "IQMConfig":
         return cls(
             ext_dict.get("auth_server_url"),
