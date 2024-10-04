@@ -14,11 +14,15 @@
 
 import json
 import os
-from typing import cast, Dict, List, Optional, Sequence, Tuple, Union
+from collections.abc import Sequence
+from typing import Optional, Union, cast
 from uuid import UUID
+
+import numpy as np
+
 from iqm.iqm_client.iqm_client import Circuit as IQMCircuit
 from iqm.iqm_client.iqm_client import Instruction, IQMClient, Metadata, Status
-import numpy as np
+from pytket.architecture import Architecture
 from pytket.backends import Backend, CircuitStatus, ResultHandle, StatusEnum
 from pytket.backends.backend import KwargTypes
 from pytket.backends.backend_exceptions import CircuitNotRunError
@@ -29,32 +33,32 @@ from pytket.circuit import Circuit, Node, OpType
 from pytket.extensions.iqm._metadata import __extension_version__
 from pytket.passes import (
     BasePass,
-    SequencePass,
-    SynthesiseTket,
-    FullPeepholeOptimise,
-    FlattenRegisters,
-    RebaseCustom,
+    CliffordSimp,
     DecomposeBoxes,
-    RemoveRedundancies,
     DefaultMappingPass,
     DelayMeasures,
-    SimplifyInitial,
+    FlattenRegisters,
+    FullPeepholeOptimise,
     KAKDecomposition,
-    CliffordSimp,
+    RebaseCustom,
+    RemoveRedundancies,
+    SequencePass,
+    SimplifyInitial,
+    SynthesiseTket,
 )
 from pytket.predicates import (
     ConnectivityPredicate,
     GateSetPredicate,
+    NoBarriersPredicate,
     NoClassicalControlPredicate,
     NoFastFeedforwardPredicate,
-    NoBarriersPredicate,
     NoMidMeasurePredicate,
     NoSymbolsPredicate,
     Predicate,
 )
-from pytket.architecture import Architecture
 from pytket.utils import prepare_circuit
 from pytket.utils.outcomearray import OutcomeArray
+
 from .config import IQMConfig
 
 # Mapping of natively supported instructions' names to members of Pytket OpType
@@ -86,7 +90,7 @@ class IQMBackend(Backend):
     def __init__(
         self,
         url: str,
-        arch: Optional[List[List[str]]] = None,
+        arch: Optional[list[list[str]]] = None,
         auth_server_url: Optional[str] = None,
         username: Optional[str] = None,
         password: Optional[str] = None,
@@ -157,7 +161,7 @@ class IQMBackend(Backend):
         return self._backendinfo
 
     @property
-    def required_predicates(self) -> List[Predicate]:
+    def required_predicates(self) -> list[Predicate]:
         return [
             NoClassicalControlPredicate(),
             NoFastFeedforwardPredicate(),
@@ -200,7 +204,7 @@ class IQMBackend(Backend):
         n_shots: Union[None, int, Sequence[Optional[int]]] = None,
         valid_check: bool = True,
         **kwargs: KwargTypes,
-    ) -> List[ResultHandle]:
+    ) -> list[ResultHandle]:
         """
         See :py:meth:`pytket.backends.Backend.process_circuits`.
 
@@ -251,7 +255,7 @@ class IQMBackend(Backend):
         return handles
 
     def _update_cache_result(
-        self, handle: ResultHandle, result_dict: Dict[str, BackendResult]
+        self, handle: ResultHandle, result_dict: dict[str, BackendResult]
     ) -> None:
         if handle in self._cache:
             self._cache[handle].update(result_dict)
@@ -350,7 +354,7 @@ def _as_name(qnode: Node) -> str:
     return f"QB{qnode.index[0] + 1}"
 
 
-def _translate_iqm(circ: Circuit) -> Tuple[Instruction, ...]:
+def _translate_iqm(circ: Circuit) -> tuple[Instruction, ...]:
     """Convert a circuit in the IQM gate set to IQM list representation."""
     instrs = []
     for cmd in circ.get_commands():
@@ -393,11 +397,12 @@ def _iqm_rebase() -> BasePass:
     c_cx.add_gate(OpType.PhasedX, [0.5, 0.5], [1])
 
     # TK1 replacement
-    c_tk1 = (
-        lambda a, b, c: Circuit(1)
-        .add_gate(OpType.PhasedX, [-1, (a - c) / 2], [0])
-        .add_gate(OpType.PhasedX, [1 + b, a], [0])
-    )
+    def c_tk1(a, b, c):
+        return (
+            Circuit(1)
+            .add_gate(OpType.PhasedX, [-1, (a - c) / 2], [0])
+            .add_gate(OpType.PhasedX, [1 + b, a], [0])
+        )
 
     return RebaseCustom({OpType.CZ, OpType.PhasedX}, c_cx, c_tk1)
 

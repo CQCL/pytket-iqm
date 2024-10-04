@@ -13,9 +13,11 @@
 # limitations under the License.
 
 import os
+
 import pytest
-from pytket.extensions.iqm import IQMBackend
+
 from pytket.circuit import Circuit
+from pytket.extensions.iqm import IQMBackend
 
 
 def get_demo_url() -> str:
