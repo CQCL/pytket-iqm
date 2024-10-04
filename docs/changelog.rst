@@ -1,5 +1,12 @@
+.. currentmodule:: pytket.extensions.iqm
+
 Changelog
 ~~~~~~~~~
+
+0.15.0 (October 2024)
+---------------------
+
+* Updated pytket version requirement to 1.33.
 
 0.14.0 (July 2024)
 ------------------
