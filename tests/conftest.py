@@ -18,28 +18,14 @@ from pytket.extensions.iqm import IQMBackend
 from pytket.circuit import Circuit
 
 
-def get_demo_url() -> str:
-    return "https://demo.qc.iqm.fi/cocos"
-
-
-@pytest.fixture(name="demo_url", scope="session")
-def fixture_demo_url() -> str:
-    return get_demo_url()
-
-
 @pytest.fixture(name="authenticated_iqm_backend", scope="session")
 def fixture_authenticated_iqm_backend() -> IQMBackend:
     # Authenticated IQMBackend used for the remote tests
-    # The credentials are taken from the env variables:
-    # - PYTKET_REMOTE_IQM_AUTH_SERVER_URL
-    # - PYTKET_REMOTE_IQM_USERNAME
-    # - PYTKET_REMOTE_IQM_PASSWORD
+    # The credentials are taken from the env variable:
+    # - PYTKET_REMOTE_IQM_API_TOKEN
 
     return IQMBackend(
-        url=get_demo_url(),
-        auth_server_url=os.getenv("PYTKET_REMOTE_IQM_AUTH_SERVER_URL"),
-        username=os.getenv("PYTKET_REMOTE_IQM_USERNAME"),
-        password=os.getenv("PYTKET_REMOTE_IQM_PASSWORD"),
+        device="pyrite:test", api_token=os.getenv("PYTKET_REMOTE_IQM_API_TOKEN")
     )
 
 

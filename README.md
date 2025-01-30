@@ -38,12 +38,7 @@ compile it and run. Here is a small example of running a GHZ state circuit:
 from pytket.extensions.iqm import IQMBackend
 from pytket.circuit import Circuit
 
-backend = IQMBackend(
-	url="https://demo.qc.iqm.fi/cocos",
-	auth_server_url="https://demo.qc.iqm.fi/auth",
-	username="USERNAME",
-	password="PASSWORD",
-)
+backend = IQMBackend(device="garnet", api_token="API_TOKEN")
 
 circuit = Circuit(3, 3)
 circuit.H(0)
@@ -56,9 +51,14 @@ result = backend.run_circuit(compiled_circuit, n_shots=100)
 print(result.get_shots())
 ```
 
+Note that the API token can be provided explicitly as an argument when
+constructing the backend; alternatively it can be stored in pytket config (see
+`IQMConfig.set_iqm_config()`); or it can be stored in a file whose location is
+given by the environment variable `IQM_TOKENS_FILE`.
+
 The IQM Client documentation includes the [set of currently supported
 instructions]
-(https://iqm-finland.github.io/iqm-client/api/iqm_client.iqm_client.html).
+(https://iqm-finland.github.io/iqm-client/api/iqm.iqm_client.models.Instruction.html).
 `pytket-iqm` retrieves the set from the IQM backend during the initialisation;
 then `get_compiled_circuit()` takes care of compiling the circuit into the
 form suitable to run on the backend.
@@ -70,7 +70,7 @@ does not make sense, since the IQM server reports the valid quantum architecture
 relevant to the given backend URL.
 
 (Note: At the moment IQM does not provide a quantum computing service open to the 
-general public. Please contact our [sales team](https://www.meetiqm.com/contact/) 
+general public. Please contact their [sales team](https://www.meetiqm.com/contact/)
 to set up your access to an IQM quantum computer.)
 
 ## Bugs and feature requests
@@ -128,14 +128,10 @@ pytest
 ```
 
 By default, the remote tests, which run against the real backend server, are 
-skipped. To enable them, set the following environment variables:
-
-```shell
-export PYTKET_RUN_REMOTE_TESTS=1
-export PYTKET_REMOTE_IQM_AUTH_SERVER_URL=https://demo.qc.iqm.fi/auth
-export PYTKET_REMOTE_IQM_USERNAME=YOUR_USERNAME
-export PYTKET_REMOTE_IQM_PASSWORD=YOUR_PASSWORD
-```
+skipped. To enable them, set the environment variable
+`PYTKET_RUN_REMOTE_TESTS=1` and make sure you have your API token stored either
+in pytket config or in a file whose location is given by the environment
+variable `IQM_TOKENS_FILE`.
 
 When adding a new feature, please add a test for it. When fixing a bug, please
 add a test that demonstrates the fix.
