@@ -6,7 +6,9 @@ Changelog
 0.16.0 (unreleased)
 -------------------
 
-* Updated pytket version requirement to 1.39.
+* Updated pytket version requirement to 1.40.
+* Bring up to date with latest IQM client and server.
+* Change parameters used to initialize IQMBackend.
 
 0.15.0 (October 2024)
 ---------------------
