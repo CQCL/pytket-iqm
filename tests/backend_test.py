@@ -15,7 +15,6 @@
 import os
 from uuid import UUID
 import pytest
-from requests import get
 from iqm.iqm_client.errors import ClientAuthenticationError
 from iqm.iqm_client.models import Metadata, RunRequest
 from pytket.circuit import Circuit
