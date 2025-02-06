@@ -114,7 +114,7 @@ class IQMBackend(Backend):
         :param api_token: API token
         """
         super().__init__()
-        config = IQMConfig.from_default_config_file()
+        config: IQMConfig = IQMConfig.from_default_config_file()
 
         if api_token is None:
             api_token = config.api_token
@@ -357,14 +357,14 @@ def _translate_iqm(circ: Circuit) -> Tuple[Instruction, ...]:
         optype = op.type
         params = op.params
         if optype == OpType.PhasedX:
-            instr = Instruction(
+            instr = Instruction(  # type: ignore
                 name="prx",
                 implementation=None,
                 qubits=(str(qbs[0]),),
                 args={"angle_t": 0.5 * params[0], "phase_t": 0.5 * params[1]},
             )
         elif optype == OpType.CZ:
-            instr = Instruction(
+            instr = Instruction(  # type: ignore
                 name="cz",
                 implementation=None,
                 qubits=(str(qbs[0]), str(qbs[1])),
@@ -372,7 +372,7 @@ def _translate_iqm(circ: Circuit) -> Tuple[Instruction, ...]:
             )
         else:
             assert optype == OpType.Measure
-            instr = Instruction(
+            instr = Instruction(  # type: ignore
                 name="measure",
                 implementation=None,
                 qubits=(str(qbs[0]),),

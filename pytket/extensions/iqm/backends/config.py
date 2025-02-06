@@ -28,7 +28,7 @@ class IQMConfig(PytketExtConfig):
     api_token: Optional[str]
 
     @classmethod
-    def from_extension_dict(
+    def from_extension_dict(  # type: ignore
         cls: Type["IQMConfig"], ext_dict: Dict[str, Any]
     ) -> "IQMConfig":
         return cls(ext_dict.get("api_token"))
@@ -36,7 +36,7 @@ class IQMConfig(PytketExtConfig):
 
 def set_iqm_config(api_token: Optional[str] = None) -> None:
     """Set default value for IQM API token."""
-    config = IQMConfig.from_default_config_file()
+    config: IQMConfig = IQMConfig.from_default_config_file()
     if api_token is not None:
         config.api_token = api_token
     config.update_default_config_file()
