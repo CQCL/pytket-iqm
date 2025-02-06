@@ -64,10 +64,7 @@ then `get_compiled_circuit()` takes care of compiling the circuit into the
 form suitable to run on the backend.
 
 During the backend initialisation, `pytket-iqm` also retrieves the names of
-physical qubits and qubit connectivity. You can override the qubit connectivity
-by providing the `arch` parameter to the `IQMBackend` constructor, but it generally
-does not make sense, since the IQM server reports the valid quantum architecture
-relevant to the given backend URL.
+physical qubits and qubit connectivity.
 
 (Note: At the moment IQM does not provide a quantum computing service open to the 
 general public. Please contact their [sales team](https://www.meetiqm.com/contact/)

@@ -96,7 +96,6 @@ class IQMBackend(Backend):
     def __init__(
         self,
         device: str,
-        arch: Optional[List[List[str]]] = None,
         api_token: Optional[str] = None,
     ):
         """
@@ -112,8 +111,6 @@ class IQMBackend(Backend):
         arguments.
 
         :param device: Name of device, e.g. "garnet"
-        :param arch: Optional list of couplings between the qubits defined, if
-        not set the default value from the server is used.
         :param api_token: API token
         """
         super().__init__()
@@ -138,9 +135,7 @@ class IQMBackend(Backend):
         self._operations = [_IQM_PYTKET_OP_MAP[op] for op in _iqmqa.operations]
         self._qubits = [_as_node(qb) for qb in _iqmqa.qubits]
         self._n_qubits = len(self._qubits)
-        if arch is None:
-            arch = _iqmqa.qubit_connectivity
-        coupling = [(_as_node(a), _as_node(b)) for (a, b) in arch]
+        coupling = [(_as_node(a), _as_node(b)) for (a, b) in _iqmqa.qubit_connectivity]
         if any(qb not in self._qubits for couple in coupling for qb in couple):
             raise ValueError("Architecture contains qubits not in device")
         self._arch = Architecture(coupling)
