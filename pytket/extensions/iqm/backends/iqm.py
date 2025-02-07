@@ -16,8 +16,9 @@ import json
 import os
 from typing import cast, Dict, List, Optional, Sequence, Tuple, Union
 from uuid import UUID
-from iqm.iqm_client.iqm_client import Circuit as IQMCircuit
-from iqm.iqm_client.iqm_client import Instruction, IQMClient, Metadata, Status
+from iqm.iqm_client.iqm_client import IQMClient
+from iqm.iqm_client.models import Circuit as IQMCircuit
+from iqm.iqm_client.models import Instruction, Metadata, Status
 import numpy as np
 from pytket.backends import Backend, CircuitStatus, ResultHandle, StatusEnum
 from pytket.backends.backend import KwargTypes
@@ -59,11 +60,13 @@ from .config import IQMConfig
 
 # Mapping of natively supported instructions' names to members of Pytket OpType
 _IQM_PYTKET_OP_MAP = {
-    "phased_rx": OpType.PhasedX,
+    "prx": OpType.PhasedX,
     "cz": OpType.CZ,
-    "measurement": OpType.Measure,
+    "measure": OpType.Measure,
     "barrier": OpType.Barrier,
 }
+
+_SERVER_URL = "https://cocos.resonance.meetiqm.com"
 
 
 class IqmAuthenticationError(Exception):
@@ -71,6 +74,13 @@ class IqmAuthenticationError(Exception):
 
     def __init__(self) -> None:
         super().__init__("No IQM access credentials provided or found in config file.")
+
+
+class IqmDeviceUnsupportedError(Exception):
+    """Raised when we are unable to support a requested device."""
+
+    def __init__(self, reason: str) -> None:
+        super().__init__(reason)
 
 
 class IQMBackend(Backend):
@@ -85,62 +95,47 @@ class IQMBackend(Backend):
 
     def __init__(
         self,
-        url: str,
-        arch: Optional[List[List[str]]] = None,
-        auth_server_url: Optional[str] = None,
-        username: Optional[str] = None,
-        password: Optional[str] = None,
+        device: str,
+        api_token: Optional[str] = None,
     ):
         """
         Construct a new IQM backend.
 
-        Requires _either_ a valid auth server URL, username and password, _or_ a tokens
-        file.
+        Requires either a valid API token or a tokens file.
 
-        Auth server URL, username and password can either be provided as parameters or
-        set in config using :py:meth:`pytket.extensions.iqm.set_iqm_config`.
+        API token can either be provided as a parameter or set in config using
+        :py:meth:`pytket.extensions.iqm.set_iqm_config`.
 
         Path to the tokens file is read from the environmment variable
         ``IQM_TOKENS_FILE``. If set, this overrides any other credentials provided as
         arguments.
 
-        :param url: base URL for requests
-        :param arch: Optional list of couplings between the qubits defined, if
-        not set the default value from the server is used.
-        :param auth_server_url: base URL of authentication server
-        :param username: IQM username
-        :param password: IQM password
+        :param device: Name of device, e.g. "garnet"
+        :param api_token: API token
         """
         super().__init__()
-        self._url = url
-        config = IQMConfig.from_default_config_file()
+        config: IQMConfig = IQMConfig.from_default_config_file()
 
-        if auth_server_url is None:
-            auth_server_url = config.auth_server_url
+        if api_token is None:
+            api_token = config.api_token
         tokens_file = os.getenv("IQM_TOKENS_FILE")
-        if username is None:
-            username = config.username
-        if password is None:
-            password = config.password
-        if (username is None or password is None) and tokens_file is None:
+        if api_token is None and tokens_file is None:
             raise IqmAuthenticationError()
-
+        url = f"{_SERVER_URL}/{device}"
         if tokens_file is None:
-            self._client = IQMClient(
-                self._url,
-                auth_server_url=auth_server_url,
-                username=username,
-                password=password,
-            )
+            self._client = IQMClient(url=url, token=api_token)
         else:
-            self._client = IQMClient(self._url, tokens_file=tokens_file)
+            self._client = IQMClient(url=url, tokens_file=tokens_file)
         _iqmqa = self._client.get_quantum_architecture()
+        # TODO We don't currently support resonator qubits or the "move" operation.
+        if "move" in _iqmqa.operations:
+            raise IqmDeviceUnsupportedError(
+                "Unable to support device with computational resonator"
+            )
         self._operations = [_IQM_PYTKET_OP_MAP[op] for op in _iqmqa.operations]
         self._qubits = [_as_node(qb) for qb in _iqmqa.qubits]
         self._n_qubits = len(self._qubits)
-        if arch is None:
-            arch = _iqmqa.qubit_connectivity
-        coupling = [(_as_node(a), _as_node(b)) for (a, b) in arch]
+        coupling = [(_as_node(a), _as_node(b)) for (a, b) in _iqmqa.qubit_connectivity]
         if any(qb not in self._qubits for couple in coupling for qb in couple):
             raise ValueError("Architecture contains qubits not in device")
         self._arch = Architecture(coupling)
@@ -263,9 +258,7 @@ class IQMBackend(Backend):
         run_id = UUID(bytes=cast(bytes, handle[0]))
         run_result = self._client.get_run(run_id)
         status = run_result.status
-        if status == Status.PENDING_EXECUTION:
-            return CircuitStatus(StatusEnum.SUBMITTED)
-        elif status == Status.READY:
+        if status == Status.READY:
             measurements = cast(dict, run_result.measurements)[0]
             shots = OutcomeArray.from_readouts(
                 np.array(
@@ -281,9 +274,10 @@ class IQMBackend(Backend):
                 handle, {"result": BackendResult(shots=shots, ppcirc=ppcirc)}
             )
             return CircuitStatus(StatusEnum.COMPLETED)
-        else:
-            assert status == Status.FAILED
+        elif status in [Status.FAILED, Status.ABORTED]:
             return CircuitStatus(StatusEnum.ERROR, cast(str, run_result.message))
+        else:
+            return CircuitStatus(StatusEnum.SUBMITTED)
 
     def get_result(self, handle: ResultHandle, **kwargs: KwargTypes) -> BackendResult:
         """
@@ -339,10 +333,13 @@ class IQMBackend(Backend):
 
 
 def _as_node(qname: str) -> Node:
-    assert qname.startswith("QB")
-    x = int(qname[2:])
-    assert x >= 1
-    return Node(x - 1)
+    if qname == "COMP_R":
+        return Node(0)
+    else:
+        assert qname.startswith("QB")
+        x = int(qname[2:])
+        assert x >= 1
+        return Node(x - 1)
 
 
 def _as_name(qnode: Node) -> str:
@@ -360,14 +357,14 @@ def _translate_iqm(circ: Circuit) -> Tuple[Instruction, ...]:
         optype = op.type
         params = op.params
         if optype == OpType.PhasedX:
-            instr = Instruction(
-                name="phased_rx",
+            instr = Instruction(  # type: ignore
+                name="prx",
                 implementation=None,
                 qubits=(str(qbs[0]),),
                 args={"angle_t": 0.5 * params[0], "phase_t": 0.5 * params[1]},
             )
         elif optype == OpType.CZ:
-            instr = Instruction(
+            instr = Instruction(  # type: ignore
                 name="cz",
                 implementation=None,
                 qubits=(str(qbs[0]), str(qbs[1])),
@@ -375,8 +372,8 @@ def _translate_iqm(circ: Circuit) -> Tuple[Instruction, ...]:
             )
         else:
             assert optype == OpType.Measure
-            instr = Instruction(
-                name="measurement",
+            instr = Instruction(  # type: ignore
+                name="measure",
                 implementation=None,
                 qubits=(str(qbs[0]),),
                 args={"key": str(cbs[0])},

@@ -15,9 +15,8 @@
 import os
 from uuid import UUID
 import pytest
-from requests import get
-from conftest import get_demo_url  # type: ignore
-from iqm.iqm_client.iqm_client import ClientAuthenticationError, Metadata, RunRequest
+from iqm.iqm_client.errors import ClientAuthenticationError
+from iqm.iqm_client.models import Metadata, RunRequest
 from pytket.circuit import Circuit
 from pytket.backends import StatusEnum
 from pytket.extensions.iqm import IQMBackend
@@ -25,11 +24,6 @@ from pytket.extensions.iqm import IQMBackend
 # Skip remote tests if not specified
 skip_remote_tests: bool = os.getenv("PYTKET_RUN_REMOTE_TESTS") is None
 REASON = "PYTKET_RUN_REMOTE_TESTS not set (requires configuration of IQM credentials)"
-
-# Skip remote tests if the IQM demo site is unavailable
-if skip_remote_tests is False and get(get_demo_url()).status_code != 200:
-    skip_remote_tests = True
-    REASON = "The IQM demo site/service is unavailable"
 
 
 @pytest.mark.skipif(skip_remote_tests, reason=REASON)
@@ -46,14 +40,9 @@ def test_iqm(authenticated_iqm_backend: IQMBackend, sample_circuit: Circuit) -> 
 
 
 @pytest.mark.skipif(skip_remote_tests, reason=REASON)
-def test_invalid_cred(demo_url: str) -> None:
+def test_invalid_cred() -> None:
     with pytest.raises(ClientAuthenticationError):
-        _ = IQMBackend(
-            url=demo_url,
-            auth_server_url="https://demo.qc.iqm.fi/auth",
-            username="invalid",
-            password="invalid",
-        )
+        _ = IQMBackend(device="garnet", api_token="invalid")
 
 
 @pytest.mark.skipif(skip_remote_tests, reason=REASON)
