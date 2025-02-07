@@ -3,8 +3,8 @@
 Changelog
 ~~~~~~~~~
 
-0.16.0 (unreleased)
--------------------
+0.16.0 (February 2025)
+----------------------
 
 * Updated pytket version requirement to 1.40.
 * Bring up to date with latest IQM client and server.
