@@ -14,8 +14,9 @@
 
 """IQM config."""
 
-from typing import Any, Dict, Optional, Type, ClassVar
 from dataclasses import dataclass
+from typing import Any, ClassVar
+
 from pytket.config import PytketExtConfig
 
 
@@ -25,16 +26,16 @@ class IQMConfig(PytketExtConfig):
 
     ext_dict_key: ClassVar[str] = "iqm"
 
-    api_token: Optional[str]
+    api_token: str | None
 
     @classmethod
     def from_extension_dict(  # type: ignore
-        cls: Type["IQMConfig"], ext_dict: Dict[str, Any]
+        cls: type["IQMConfig"], ext_dict: dict[str, Any]
     ) -> "IQMConfig":
         return cls(ext_dict.get("api_token"))
 
 
-def set_iqm_config(api_token: Optional[str] = None) -> None:
+def set_iqm_config(api_token: str | None = None) -> None:
     """Set default value for IQM API token."""
     config: IQMConfig = IQMConfig.from_default_config_file()
     if api_token is not None:

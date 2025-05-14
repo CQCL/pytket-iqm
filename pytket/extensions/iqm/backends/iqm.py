@@ -14,12 +14,16 @@
 
 import json
 import os
-from typing import cast, Dict, List, Optional, Sequence, Tuple, Union
+from collections.abc import Sequence
+from typing import cast
 from uuid import UUID
+
+import numpy as np
+
 from iqm.iqm_client.iqm_client import IQMClient
 from iqm.iqm_client.models import Circuit as IQMCircuit
 from iqm.iqm_client.models import Instruction, Metadata, Status
-import numpy as np
+from pytket.architecture import Architecture
 from pytket.backends import Backend, CircuitStatus, ResultHandle, StatusEnum
 from pytket.backends.backend import KwargTypes
 from pytket.backends.backend_exceptions import CircuitNotRunError
@@ -30,32 +34,32 @@ from pytket.circuit import Circuit, Node, OpType
 from pytket.extensions.iqm._metadata import __extension_version__
 from pytket.passes import (
     BasePass,
-    SequencePass,
-    SynthesiseTket,
-    FullPeepholeOptimise,
-    FlattenRegisters,
-    RebaseCustom,
+    CliffordSimp,
     DecomposeBoxes,
-    RemoveRedundancies,
     DefaultMappingPass,
     DelayMeasures,
-    SimplifyInitial,
+    FlattenRegisters,
+    FullPeepholeOptimise,
     KAKDecomposition,
-    CliffordSimp,
+    RebaseCustom,
+    RemoveRedundancies,
+    SequencePass,
+    SimplifyInitial,
+    SynthesiseTket,
 )
 from pytket.predicates import (
     ConnectivityPredicate,
     GateSetPredicate,
+    NoBarriersPredicate,
     NoClassicalControlPredicate,
     NoFastFeedforwardPredicate,
-    NoBarriersPredicate,
     NoMidMeasurePredicate,
     NoSymbolsPredicate,
     Predicate,
 )
-from pytket.architecture import Architecture
 from pytket.utils import prepare_circuit
 from pytket.utils.outcomearray import OutcomeArray
+
 from .config import IQMConfig
 
 # Mapping of natively supported instructions' names to members of Pytket OpType
@@ -96,7 +100,7 @@ class IQMBackend(Backend):
     def __init__(
         self,
         device: str,
-        api_token: Optional[str] = None,
+        api_token: str | None = None,
     ):
         """
         Construct a new IQM backend.
@@ -120,7 +124,7 @@ class IQMBackend(Backend):
             api_token = config.api_token
         tokens_file = os.getenv("IQM_TOKENS_FILE")
         if api_token is None and tokens_file is None:
-            raise IqmAuthenticationError()
+            raise IqmAuthenticationError
         url = f"{_SERVER_URL}/{device}"
         if tokens_file is None:
             self._client = IQMClient(url=url, token=api_token)
@@ -152,7 +156,7 @@ class IQMBackend(Backend):
         return self._backendinfo
 
     @property
-    def required_predicates(self) -> List[Predicate]:
+    def required_predicates(self) -> list[Predicate]:
         return [
             NoClassicalControlPredicate(),
             NoFastFeedforwardPredicate(),
@@ -173,11 +177,11 @@ class IQMBackend(Backend):
             passes.append(self.rebase_pass())  # to satisfy MaxTwoQubitGatesPredicate
         elif optimisation_level == 1:
             passes.append(SynthesiseTket())
-        elif optimisation_level == 2:
+        elif optimisation_level == 2:  # noqa: PLR2004
             passes.append(FullPeepholeOptimise())
         passes.append(DefaultMappingPass(self._arch))
         passes.append(DelayMeasures())
-        if optimisation_level == 2:
+        if optimisation_level == 2:  # noqa: PLR2004
             passes.append(KAKDecomposition(allow_swaps=False))
             passes.append(CliffordSimp(allow_swaps=False))
             passes.append(SynthesiseTket())
@@ -192,10 +196,10 @@ class IQMBackend(Backend):
     def process_circuits(
         self,
         circuits: Sequence[Circuit],
-        n_shots: Union[None, int, Sequence[Optional[int]]] = None,
+        n_shots: None | int | Sequence[int | None] = None,
         valid_check: bool = True,
         **kwargs: KwargTypes,
-    ) -> List[ResultHandle]:
+    ) -> list[ResultHandle]:
         """
         See :py:meth:`pytket.backends.Backend.process_circuits`.
 
@@ -207,7 +211,7 @@ class IQMBackend(Backend):
           False)
         """
         circuits = list(circuits)
-        n_shots_list = Backend._get_n_shots_as_list(
+        n_shots_list = Backend._get_n_shots_as_list(  # noqa: SLF001
             n_shots,
             len(circuits),
             optional=False,
@@ -220,7 +224,7 @@ class IQMBackend(Backend):
         simplify_initial = kwargs.get("postprocess", False)
 
         handles = []
-        for i, (c, n_shots) in enumerate(zip(circuits, n_shots_list)):
+        for i, (c, n_shots) in enumerate(zip(circuits, n_shots_list, strict=False)):  # noqa: PLR1704
             if postprocess:
                 c0, ppcirc = prepare_circuit(c, allow_classical=False, xcirc=_xcirc)
                 ppcirc_rep = ppcirc.to_dict()
@@ -231,7 +235,7 @@ class IQMBackend(Backend):
                     allow_classical=False, create_all_qubits=True, xcirc=_xcirc
                 ).apply(c0)
             instrs = _translate_iqm(c0)
-            qm = {str(qb): _as_name(cast(Node, qb)) for qb in c.qubits}
+            qm = {str(qb): _as_name(cast("Node", qb)) for qb in c.qubits}
             iqmc = IQMCircuit(
                 name=c.name if c.name else f"circuit_{i}",
                 instructions=instrs,
@@ -242,11 +246,11 @@ class IQMBackend(Backend):
             )
             handles.append(ResultHandle(run_id.bytes, json.dumps(ppcirc_rep)))
         for handle in handles:
-            self._cache[handle] = dict()
+            self._cache[handle] = dict()  # noqa: C408
         return handles
 
     def _update_cache_result(
-        self, handle: ResultHandle, result_dict: Dict[str, BackendResult]
+        self, handle: ResultHandle, result_dict: dict[str, BackendResult]
     ) -> None:
         if handle in self._cache:
             self._cache[handle].update(result_dict)
@@ -255,11 +259,11 @@ class IQMBackend(Backend):
 
     def circuit_status(self, handle: ResultHandle) -> CircuitStatus:
         self._check_handle_type(handle)
-        run_id = UUID(bytes=cast(bytes, handle[0]))
+        run_id = UUID(bytes=cast("bytes", handle[0]))
         run_result = self._client.get_run(run_id)
         status = run_result.status
         if status == Status.READY:
-            measurements = cast(dict, run_result.measurements)[0]
+            measurements = cast("dict", run_result.measurements)[0]
             shots = OutcomeArray.from_readouts(
                 np.array(
                     [[r[0] for r in rlist] for cbstr, rlist in measurements.items()],
@@ -268,16 +272,15 @@ class IQMBackend(Backend):
                 .transpose()
                 .tolist()
             )
-            ppcirc_rep = json.loads(cast(str, handle[1]))
+            ppcirc_rep = json.loads(cast("str", handle[1]))
             ppcirc = Circuit.from_dict(ppcirc_rep) if ppcirc_rep is not None else None
             self._update_cache_result(
                 handle, {"result": BackendResult(shots=shots, ppcirc=ppcirc)}
             )
             return CircuitStatus(StatusEnum.COMPLETED)
-        elif status in [Status.FAILED, Status.ABORTED]:
-            return CircuitStatus(StatusEnum.ERROR, cast(str, run_result.message))
-        else:
-            return CircuitStatus(StatusEnum.SUBMITTED)
+        if status in [Status.FAILED, Status.ABORTED]:
+            return CircuitStatus(StatusEnum.ERROR, cast("str", run_result.message))
+        return CircuitStatus(StatusEnum.SUBMITTED)
 
     def get_result(self, handle: ResultHandle, **kwargs: KwargTypes) -> BackendResult:
         """
@@ -289,14 +292,13 @@ class IQMBackend(Backend):
         except CircuitNotRunError:
             timeout = kwargs.get("timeout", 900)
             # Wait for job to finish; result will then be in the cache.
-            run_id = UUID(bytes=cast(bytes, handle[0]))
-            self._client.wait_for_results(run_id, timeout_secs=cast(float, timeout))
+            run_id = UUID(bytes=cast("bytes", handle[0]))
+            self._client.wait_for_results(run_id, timeout_secs=cast("float", timeout))
             circuit_status = self.circuit_status(handle)
             if circuit_status.status is StatusEnum.COMPLETED:
-                return cast(BackendResult, self._cache[handle]["result"])
-            else:
-                assert circuit_status.status is StatusEnum.ERROR
-                raise RuntimeError(circuit_status.message)
+                return cast("BackendResult", self._cache[handle]["result"])
+            assert circuit_status.status is StatusEnum.ERROR
+            raise RuntimeError(circuit_status.message)  # noqa: B904
 
     def get_metadata(self, handle: ResultHandle, **kwargs: KwargTypes) -> Metadata:
         """Return the metadata corresponding to the handle.
@@ -321,25 +323,24 @@ class IQMBackend(Backend):
         """
         self._check_handle_type(handle)
         if handle in self._cache and "metadata" in self._cache[handle]:
-            return cast(Metadata, self._cache[handle]["metadata"])
+            return cast("Metadata", self._cache[handle]["metadata"])
         # Wait for job to finish, capture metadata and store it in cache
         timeout = kwargs.get("timeout", 900)
-        run_id = UUID(bytes=cast(bytes, handle[0]))
+        run_id = UUID(bytes=cast("bytes", handle[0]))
         run_result = self._client.wait_for_results(
-            run_id, timeout_secs=cast(float, timeout)
+            run_id, timeout_secs=cast("float", timeout)
         )
         self._cache[handle]["metadata"] = run_result.metadata
-        return cast(Metadata, self._cache[handle]["metadata"])
+        return cast("Metadata", self._cache[handle]["metadata"])
 
 
 def _as_node(qname: str) -> Node:
     if qname == "COMP_R":
         return Node(0)
-    else:
-        assert qname.startswith("QB")
-        x = int(qname[2:])
-        assert x >= 1
-        return Node(x - 1)
+    assert qname.startswith("QB")
+    x = int(qname[2:])
+    assert x >= 1
+    return Node(x - 1)
 
 
 def _as_name(qnode: Node) -> str:
@@ -347,7 +348,7 @@ def _as_name(qnode: Node) -> str:
     return f"QB{qnode.index[0] + 1}"
 
 
-def _translate_iqm(circ: Circuit) -> Tuple[Instruction, ...]:
+def _translate_iqm(circ: Circuit) -> tuple[Instruction, ...]:
     """Convert a circuit in the IQM gate set to IQM list representation."""
     instrs = []
     for cmd in circ.get_commands():

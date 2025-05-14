@@ -15,6 +15,6 @@
 """Backends for processing pytket circuits with IQM devices"""
 
 # _metadata.py is copied to the folder after installation.
-from ._metadata import __extension_version__, __extension_name__
+from ._metadata import __extension_name__, __extension_version__
 from .backends import IQMBackend
 from .backends.config import IQMConfig, set_iqm_config
