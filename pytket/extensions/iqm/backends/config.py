@@ -29,7 +29,7 @@ class IQMConfig(PytketExtConfig):
     api_token: str | None
 
     @classmethod
-    def from_extension_dict(  # type: ignore
+    def from_extension_dict(
         cls: type["IQMConfig"], ext_dict: dict[str, Any]
     ) -> "IQMConfig":
         return cls(ext_dict.get("api_token"))
