@@ -56,8 +56,8 @@ Changelog
 0.8.0 (October 2023)
 --------------------
 
-* Don't include ``SimplifyInitial`` in default passes; instead make it an option
-  to ``process_circuits()``.
+* Don't include :py:meth:`~.pytket.passes.SimplifyInitial` in default passes; instead make it an option
+  to :py:meth:`~.pytket.backends.backend.Backend.process_circuits`.
 * Updated pytket version requirement to 1.21.
 
 0.7.0 (October 2023)
@@ -73,8 +73,8 @@ Changelog
 
 * Updated pytket version requirement to 1.13.
 * Updated iqm-client version requirement to 11.8.
-* New method ``IQMBackend.get_metadata()`` for reteieving metadata associated
-  with a ``ResultHandle``.
+* New method :py:meth:`~.IQMBackend.get_metadata` for reteieving metadata associated
+  with a :py:class:`~.pytket.backends.resulthandle.ResultHandle`.
 
 0.5.0 (November 2022)
 ---------------------
@@ -100,9 +100,9 @@ Changelog
 ------------------
 
 * Updated pytket version requirement to 1.1.
-* Rename ``device`` parameter for ``IQMBackend`` to ``settings``.
+* Rename ``device`` parameter for :py:class:`~.IQMBackend` to ``settings``.
 * Remove default values for URL and settings file.
-* Add ``NoBarriersPredicate`` to ``IQMBackend``.
+* Add :py:class:`~.pytket._tket.predicates.NoBarriersPredicate` to :py:class:`~.IQMBackend`.
 
 0.2.0 (March 2022)
 ------------------

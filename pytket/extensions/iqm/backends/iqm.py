@@ -207,7 +207,7 @@ class IQMBackend(Backend):
 
         * `postprocess`: apply end-of-circuit simplifications and classical
           postprocessing to improve fidelity of results (bool, default False)
-        * `simplify_initial`: apply the pytket ``SimplifyInitial`` pass to improve
+        * `simplify_initial`: apply the pytket :py:meth:`~pytket.passes.SimplifyInitial` pass to improve
           fidelity of results assuming all qubits initialized to zero (bool, default
           False)
         """
