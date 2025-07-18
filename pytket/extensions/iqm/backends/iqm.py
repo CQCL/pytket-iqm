@@ -108,7 +108,7 @@ class IQMBackend(Backend):
         Requires either a valid API token or a tokens file.
 
         API token can either be provided as a parameter or set in config using
-        :py:meth:`pytket.extensions.iqm.set_iqm_config`.
+        :py:meth:`~pytket.extensions.iqm.backends.config.set_iqm_config`.
 
         Path to the tokens file is read from the environmment variable
         ``IQM_TOKENS_FILE``. If set, this overrides any other credentials provided as
@@ -201,12 +201,13 @@ class IQMBackend(Backend):
         **kwargs: KwargTypes,
     ) -> list[ResultHandle]:
         """
-        See :py:meth:`pytket.backends.Backend.process_circuits`.
+        See :py:meth:`pytket.backends.backend.Backend.process_circuits`.
 
         Supported `kwargs`:
-        - `postprocess`: apply end-of-circuit simplifications and classical
+
+        * `postprocess`: apply end-of-circuit simplifications and classical
           postprocessing to improve fidelity of results (bool, default False)
-        - `simplify_initial`: apply the pytket ``SimplifyInitial`` pass to improve
+        * `simplify_initial`: apply the pytket :py:meth:`~pytket.passes.SimplifyInitial` pass to improve
           fidelity of results assuming all qubits initialized to zero (bool, default
           False)
         """
@@ -284,7 +285,7 @@ class IQMBackend(Backend):
 
     def get_result(self, handle: ResultHandle, **kwargs: KwargTypes) -> BackendResult:
         """
-        See :py:meth:`pytket.backends.Backend.get_result`.
+        See :py:meth:`pytket.backends.backend.Backend.get_result`.
         Supported kwargs: `timeout` (default 900).
         """
         try:
@@ -317,9 +318,7 @@ class IQMBackend(Backend):
             print([qm.physical_name for qm in metadata.request.qubit_mapping])
 
         :param handle: handle to results
-        :type handle: ResultHandle
         :return: Metadata corresponding to handle
-        :rtype: Metadata
         """
         self._check_handle_type(handle)
         if handle in self._cache and "metadata" in self._cache[handle]:
