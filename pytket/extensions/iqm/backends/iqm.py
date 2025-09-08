@@ -33,6 +33,7 @@ from pytket.backends.resulthandle import _ResultIdTuple
 from pytket.circuit import Circuit, Node, OpType
 from pytket.extensions.iqm._metadata import __extension_version__
 from pytket.passes import (
+    AutoRebase,
     BasePass,
     CliffordSimp,
     DecomposeBoxes,
@@ -41,7 +42,6 @@ from pytket.passes import (
     FlattenRegisters,
     FullPeepholeOptimise,
     KAKDecomposition,
-    RebaseCustom,
     RemoveRedundancies,
     SequencePass,
     SimplifyInitial,
@@ -383,20 +383,7 @@ def _translate_iqm(circ: Circuit) -> tuple[Instruction, ...]:
 
 
 def _iqm_rebase() -> BasePass:
-    # CX replacement
-    c_cx = Circuit(2)
-    c_cx.add_gate(OpType.PhasedX, [-0.5, 0.5], [1])
-    c_cx.CZ(0, 1)
-    c_cx.add_gate(OpType.PhasedX, [0.5, 0.5], [1])
-
-    # TK1 replacement
-    c_tk1 = (
-        lambda a, b, c: Circuit(1)
-        .add_gate(OpType.PhasedX, [-1, (a - c) / 2], [0])
-        .add_gate(OpType.PhasedX, [1 + b, a], [0])
-    )
-
-    return RebaseCustom({OpType.CZ, OpType.PhasedX}, c_cx, c_tk1)
+    return AutoRebase({OpType.CZ, OpType.PhasedX})
 
 
 _xcirc = Circuit(1).add_gate(OpType.PhasedX, [1, 0], [0]).add_phase(0.5)
