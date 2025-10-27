@@ -163,7 +163,7 @@ class IQMBackend(Backend):
         self._operations = _filter_supported_gates(_iqmqa.gates.keys())
         self._qubits = [_as_node(qb) for qb in _iqmqa.qubits]
         self._n_qubits = len(self._qubits)
-        all_pairs = list(set(pair for impl in _iqmqa.gates['cz'].implementations.values() for pair in impl.loci))
+        all_pairs = list({pair for impl in _iqmqa.gates["cz"].implementations.values() for pair in impl.loci})
         coupling = [(_as_node(a), _as_node(b)) for (a, b) in all_pairs]
         if any(qb not in self._qubits for couple in coupling for qb in couple):
             raise ValueError("Architecture contains qubits not in device")
