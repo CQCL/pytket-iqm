@@ -14,7 +14,7 @@
 
 import json
 import os
-from collections.abc import Sequence
+from collections.abc import Iterable, Sequence
 from typing import cast
 from uuid import UUID
 
@@ -71,7 +71,7 @@ _IQM_PYTKET_OP_MAP = {
 }
 
 
-def _filter_supported_gates(available_gates) -> list[OpType]:
+def _filter_supported_gates(available_gates: Iterable[str]) -> list[OpType]:
     """Filter available gates to only include those we support."""
     return [
         _IQM_PYTKET_OP_MAP[gate_name]
