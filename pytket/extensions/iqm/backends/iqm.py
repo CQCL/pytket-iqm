@@ -70,26 +70,13 @@ _IQM_PYTKET_OP_MAP = {
     "barrier": OpType.Barrier,
 }
 
-
-def _get_optype_for_gate(gate_name: str) -> OpType:
-    """Get the OpType for a gate name, supporting pattern matching for variants."""
-    # Direct mapping first
-    if gate_name in _IQM_PYTKET_OP_MAP:
-        return _IQM_PYTKET_OP_MAP[gate_name]
-    raise ValueError(f"Unsupported gate: {gate_name}")
-
-
 def _filter_supported_gates(available_gates) -> list[OpType]:
     """Filter available gates to only include those we support."""
-    supported_ops = []
-    for gate_name in available_gates:
-        try:
-            op_type = _get_optype_for_gate(gate_name)
-            supported_ops.append(op_type)
-        except ValueError:
-            # Skip unsupported gates
-            continue
-    return supported_ops
+    return [
+        _IQM_PYTKET_OP_MAP[gate_name]
+        for gate_name in available_gates
+        if gate_name in _IQM_PYTKET_OP_MAP
+    ]
 
 _SERVER_URL = "https://cocos.resonance.meetiqm.com"
 
