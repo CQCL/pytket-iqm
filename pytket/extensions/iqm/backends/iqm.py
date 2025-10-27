@@ -76,7 +76,6 @@ def _get_optype_for_gate(gate_name: str) -> OpType:
     # Direct mapping first
     if gate_name in _IQM_PYTKET_OP_MAP:
         return _IQM_PYTKET_OP_MAP[gate_name]
-    
     raise ValueError(f"Unsupported gate: {gate_name}")
 
 
