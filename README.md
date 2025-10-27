@@ -14,8 +14,8 @@ Some useful links:
 
 ## Getting started
 
-`pytket-iqm` is available for Python 3.10+, on Linux, MacOS and Windows. To
-install, run:
+`pytket-iqm` is available for Python 3.10, 3.11 and 3.12, on Linux, macOS
+and Windows. To install, run:
 
 ```shell
 pip install pytket-iqm

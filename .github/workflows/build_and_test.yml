@@ -61,12 +61,12 @@ jobs:
         ./.github/workflows/build-test nomypy
       env:
         PYTKET_RUN_REMOTE_TESTS: 1
-    - name: Set up Python 3.14
+    - name: Set up Python 3.12
       if: github.event_name == 'push' || github.event_name == 'pull_request' || github.event_name == 'schedule'
       uses: actions/setup-python@v6
       with:
-        python-version: '3.14'
-    - name: Build and test (3.14)
+        python-version: '3.12'
+    - name: Build and test (3.12)
       if: github.event_name == 'push' || github.event_name == 'pull_request' || github.event_name == 'schedule'
       shell: bash
       run: |
