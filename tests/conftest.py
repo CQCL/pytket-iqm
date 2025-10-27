@@ -15,8 +15,8 @@
 import os
 
 import pytest
-
 from pytket.circuit import Circuit
+
 from pytket.extensions.iqm import IQMBackend
 
 

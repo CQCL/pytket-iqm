@@ -18,9 +18,9 @@ from uuid import UUID
 import pytest
 from iqm.iqm_client.errors import ClientAuthenticationError
 from iqm.iqm_client.models import Metadata, RunRequest
-
 from pytket.backends import StatusEnum
 from pytket.circuit import Circuit
+
 from pytket.extensions.iqm import IQMBackend
 
 # Skip remote tests if not specified
