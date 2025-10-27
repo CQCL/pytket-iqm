@@ -70,6 +70,28 @@ _IQM_PYTKET_OP_MAP = {
     "barrier": OpType.Barrier,
 }
 
+
+def _get_optype_for_gate(gate_name: str) -> OpType:
+    """Get the OpType for a gate name, supporting pattern matching for variants."""
+    # Direct mapping first
+    if gate_name in _IQM_PYTKET_OP_MAP:
+        return _IQM_PYTKET_OP_MAP[gate_name]
+    
+    raise ValueError(f"Unsupported gate: {gate_name}")
+
+
+def _filter_supported_gates(available_gates) -> list[OpType]:
+    """Filter available gates to only include those we support."""
+    supported_ops = []
+    for gate_name in available_gates:
+        try:
+            op_type = _get_optype_for_gate(gate_name)
+            supported_ops.append(op_type)
+        except ValueError:
+            # Skip unsupported gates
+            continue
+    return supported_ops
+
 _SERVER_URL = "https://cocos.resonance.meetiqm.com"
 
 
@@ -101,6 +123,7 @@ class IQMBackend(Backend):
         self,
         device: str,
         api_token: str | None = None,
+        server_url: str | None = None,
     ):
         """
         Construct a new IQM backend.
@@ -116,6 +139,7 @@ class IQMBackend(Backend):
 
         :param device: Name of device, e.g. "garnet"
         :param api_token: API token
+        :param server_url: Base URL of the IQM server. If None, uses IQM Resonance.
         """
         super().__init__()
         config: IQMConfig = IQMConfig.from_default_config_file()
@@ -130,22 +154,23 @@ class IQMBackend(Backend):
             self._client = IQMClient(url=url, token=api_token)
         else:
             self._client = IQMClient(url=url, tokens_file=tokens_file)
-        _iqmqa = self._client.get_quantum_architecture()
+        _iqmqa = self._client.get_dynamic_quantum_architecture()
         # TODO We don't currently support resonator qubits or the "move" operation.
-        if "move" in _iqmqa.operations:
+        if len(_iqmqa.computational_resonators):
             raise IqmDeviceUnsupportedError(
                 "Unable to support device with computational resonator"
             )
-        self._operations = [_IQM_PYTKET_OP_MAP[op] for op in _iqmqa.operations]
+        self._operations = _filter_supported_gates(_iqmqa.gates.keys())
         self._qubits = [_as_node(qb) for qb in _iqmqa.qubits]
         self._n_qubits = len(self._qubits)
-        coupling = [(_as_node(a), _as_node(b)) for (a, b) in _iqmqa.qubit_connectivity]
+        all_pairs = list(set(pair for impl in _iqmqa.gates['cz'].implementations.values() for pair in impl.loci))
+        coupling = [(_as_node(a), _as_node(b)) for (a, b) in all_pairs]
         if any(qb not in self._qubits for couple in coupling for qb in couple):
             raise ValueError("Architecture contains qubits not in device")
         self._arch = Architecture(coupling)
         self._backendinfo = BackendInfo(
             name=type(self).__name__,
-            device_name=_iqmqa.name,
+            device_name=device,
             version=__extension_version__,
             architecture=self._arch,
             gate_set=set(self._operations),
